@@ -1,0 +1,14 @@
+Package: polyBreedR
+Title: Using genome-wide markers for polyploid breeding
+Version: 0.1
+Author: Jeffrey B. Endelman
+Maintainer: Jeffrey Endelman <endelman@wisc.edu>
+Description: Using genome-wide markers for polyploid breeding
+Depends: R (>= 3.5.0)
+License: GPL-3
+LazyData: true
+RoxygenNote: 7.1.0
+Encoding: UTF-8
+Imports: AGHmatrix, ggplot2, ggrepel, pedigree, grDevices, utils, tidyr
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr

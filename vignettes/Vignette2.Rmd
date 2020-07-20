@@ -1,0 +1,103 @@
+---
+title: "polyBreedR Vignette #2: Dihaploids"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{polyBreedR Vignette2}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r include=FALSE}
+library(knitr)
+library(rmarkdown)
+knitr::opts_chunk$set(echo = TRUE,collapse=FALSE,comment="##",fig.width=5,fig.height=5)
+```
+
+## Introduction
+In diploid species, where the genome is organized as two sets of homologous chromosomes, a haploid contains only one set of chromosomes (typically the maternal set). In autotetraploids, the term "dihaploid", which is a contraction of diploid and haploid, is used to describe individuals with half the number of somatic chromosomes (i.e., two sets of chromosomes). 
+
+Dihaploids of tetraploid potato (*S. tuberosum* Group Tuberosum) are typically created by pollination with certain diploid individuals from *S. tuberosum* Group Phureja, which are called haploid inducers. Historically, potato dihaploids were crossed to diploid wild relatives to introgress beneficial alleles. After recurrent selection, the improved diploids would be crossed back to elite tetraploids, exploiting their potential to produce unreduced gametes ("unilateral sexual polyploidization") and generate tetraploid offspring for further breeding. In the past decade, diploid breeding efforts have shifted to focus on the [development of inbred lines and F1 hybrids for variety development](https://potatov2.github.io/). 
+
+Not all seeds harvested from the maternal plant after pollination with the haploid inducer will be diploid; some will be aneuploid or tetraploid. In Vignette #1, the process of making tetraploid genotype calls based on a normal mixture model with 5 components was illustrated. This same model can be used for dihaploids to identify which individuals are eudiploid.
+
+## Ploidy analysis
+Data are provided for 158 potato dihaploids from 21 tetraploid parents, 2 of which are also included. The dihaploids are named following the convention [Tetraploid Parent]DH[Number]. The samples were genotyped using version 3 of the potato SNP array, which has 21,027 bi-allelic SNPs. The input data file contains the signal ratio Y/(X+Y) from the array, which provides an analog measure of allele dosage. 
+```{r}
+data.filename <- system.file("vignette_data", "potato_dihaploids.csv", package = "polyBreedR")
+data <- as.matrix(read.csv(data.filename,check.names=F,row.names=1))
+id <- colnames(data)
+parents <- unique(sapply(strsplit(id,"DH"),function(z){z[1]}))
+parents  #21 tetraploid parents
+intersect(parents,id) #two parents included
+```
+
+Several methods are available for classifying the allele ratio into discrete values 0-4, including the normal mixture model implemented in R package [fitPoly](https://cran.r-project.org/web/packages/fitPoly/index.html). Two thousand potato samples were used to fit the model for each marker, and 11,388 SNPs remained after filtering. The model file provided with the package contains 15 columns: five means, five standard deviations, and 5 mixture probabilities. To detect aneuploids or tetraploids, we will initially treat the dihaploid samples as tetraploid when using `geno_call`:
+```{r}
+model.filename <- system.file("vignette_data", "potato_V3array_model.csv", package = "polyBreedR")
+model <- read.csv(model.filename,check.names=F,row.names=1)
+head(model)
+nrow(model) #11,388 markers
+
+library(polyBreedR)
+geno4x <- geno_call(data=data,filename=model.filename,model.ploidy=4,sample.ploidy=4)
+hist(geno4x)
+```
+
+With a perfect model and codominant marker, diploid samples should have no dosage 1 or 3 calls. (The two SNP alleles are present in equal numbers for dosage 2, which is equivalent to a diploid heterozygote.) In reality, the number of dosage 1 or 3 calls is small but not zero. Looking at a large dataset is the best way to determine how "small" this number is, which in turn provides a basis for classifying polyploid outliers. The function `check_ploidy` computes the proportion of markers for each chromosome with dosage 1 or 3 and displays the result as a stacked bar chart. The map file used in this example is based on [version 6.1 of the DM potato reference genome](http://solanaceae.plantbiology.msu.edu/dm_v6_1_download.shtml) (J. Hamilton and R. Buell, personal communication) and contains 17,304 markers from the V3 array.
+
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.width=8,fig.height=5)
+```
+```{r}
+map.filename <- system.file("vignette_data", "potato_V3array_map.csv", package = "polyBreedR")
+map <- read.csv(map.filename,as.is=T)
+head(map)
+table(map$Chrom)
+
+ans <- check_ploidy(geno=geno4x,map=map)
+ans$plot
+```
+
+The output plot is sorted from smallest to largest departure from the ideal diploid. The two tetraploid parents are present near the end, so we can conclude that a number of the putative dihaploids are in fact tetraploid. Near the transition from diploid to tetraploid, aneuploids are also visible based on having one chromosome with a large proportion of dosage 1 or 3 markers. The function `check_ploidy` also returns the result in matrix format, with dimensions individual x chromosome, which can be analyzed to see the aneuploids more clearly.  
+
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.width=5,fig.height=5)
+```
+```{r}
+plot.data <- data.frame(max=apply(ans$mat,1,max),mean=apply(ans$mat,1,mean),group="ambiguous",stringsAsFactors = F)
+plot.data$group <- ifelse(plot.data$mean > 0.2,"tetraploid",plot.data$group)
+plot.data$group <- ifelse(plot.data$mean < 0.12,"diploid",plot.data$group)
+plot.data$group <- ifelse(plot.data$max > 0.2 & plot.data$mean < 0.12,"aneuploid",plot.data$group)
+library(ggplot2)
+plot.data$group <- factor(plot.data$group)
+ggplot(data=plot.data,aes(x=mean,y=max,colour=group)) + geom_point() + geom_abline(slope=1,intercept=0) + coord_fixed(ratio=1) + xlab("Chrom Average") + ylab("Chrom Maximum") + scale_color_brewer(palette="Set2", name="")
+```
+
+The above figure shows the maximum value observed for any chromosome plotted against the chromosome average. The diploids are in the lower left corner and tetraploids in the upper right. The three individuals with an average value similar to the diploids but one chromosome much higher are predicted to be aneuploid. 
+
+To obtain diploid genotype calls (0,1,2) for the diploids, use `geno_call` but with `sample.ploidy=2` to omit the dosage 1 and 3 components of the normal mixture model:
+```{r}
+geno2x <- geno_call(data=data[,which(plot.data$group=="diploid")],filename=model.filename,model.ploidy=4,sample.ploidy=2)
+hist(geno2x)
+```
+
+## Pedigree analysis
+In Vignette #1, the function `check_trio` was demonstrated for F1 tetraploid offspring of two tetraploid parents. This same function can be used to check the parentage of dihaploids because, with respect to the zygote probability distribution, haploid induction is equivalent to using a father with dosage 0. To run this analysis, use the reserved word "haploid" in the father column of the pedigree. The genotype matrix must include the dihaploids called as diploids, and the parents called as tetraploids. In this example, we will analyze dihaploid progeny of the two tetraploids included in the dataset:
+```{r}
+id <- colnames(geno2x)  #names of diploids
+parents <- sapply(strsplit(id,"DH"),function(z){z[1]}) #their parents
+geno.parents <- intersect(parents,colnames(geno4x)) #genotyped parents
+k <- which(parents %in% geno.parents)  #which dihaploids have genotyped parents
+ped <- data.frame(id=id[k],mother=parents[k],father="haploid",stringsAsFactors = F)
+geno <- cbind(geno2x[,k],geno4x[,geno.parents])
+ans2 <- check_trio(parentage=ped,geno=geno,ploidy=4)
+ans2[order(ans2$mother,ans2$error),]
+```
+
+Based on checking hundreds of trios, approximately 1% error is expected even with the correct parentage, when using the model parameter file included with the package. Values much higher than this indicate the parentage is incorrect. This can be demonstrated by re-running the analysis for the progeny of W14NYQ29-5 but with W14NYQ9-2 listed as the mother:
+```{r}
+ped2 <- ped[ped$mother=="W14NYQ29-5",]
+ped2$mother <- "W14NYQ9-2"
+check_trio(parentage=ped2,geno=geno,ploidy=4)
+```
+

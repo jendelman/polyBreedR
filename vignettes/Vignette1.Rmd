@@ -1,0 +1,120 @@
+---
+title: "polyBreedR Vignette #1: SNP array and pedigree data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{polyBreedR Vignette1}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r include=FALSE}
+library(knitr)
+library(rmarkdown)
+knitr::opts_chunk$set(echo = TRUE,collapse=FALSE,comment="##",fig.width=5,fig.height=5)
+```
+
+## Genotype calls from SNP array intensities
+SNP arrays provide signal intensity data for two different alleles, which can be visualized as the X and Y axes of a Cartesian plane. Function `readXY` reads a "FinalReport"-style output file from GenomeStudio that contains the XY data in long format; that is, each row corresponds to a different sample-marker combination. An example file containing 9 individuals genotyped with Version 3 of the potato SNP array (which has 21K markers) is provided with the vignette:
+```{r}
+data.filename <- system.file("vignette_data", "potato_V3array_XYdata.txt", package = "polyBreedR")
+dataXY <- read.table(data.filename, sep="\t",skip=9,check.names=F,as.is=T,header=T)
+head(dataXY)
+
+library(polyBreedR)
+data <- readXY(filename=data.filename,skip=9)
+str(data)
+hist(data)
+```
+
+As shown above, the output from `readXY` is a matrix with dimensions [markers x individuals], and the data values are the ratio Y/(X+Y), which varies from 0 to 1 and is an analog measure of allele dosage (theta values are also possible; see the manual). Several methods are available for classifying this ratio into discrete values 0-4, including the normal mixture model implemented in R package [fitPoly](https://cran.r-project.org/web/packages/fitPoly/index.html). Two thousand potato samples were used to fit the model for each marker, and 11,388 SNPs remained after filtering. The model file provided with the package contains 15 columns: five means, five standard deviations, and 5 mixture probabilities.
+```{r}
+model.filename <- system.file("vignette_data", "potato_V3array_model.csv", package = "polyBreedR")
+model.params <- read.csv(model.filename)
+head(model.params)
+```
+
+Use function `geno_call` to make genotype (allele dosage) calls from the allele ratio data matrix and model parameters file:
+```{r}
+geno <- geno_call(data=data,filename=model.filename)
+str(geno)
+
+#Look at relationship between XY and dosage for one marker 
+snp <- "PotVar0028728"
+ix <- which(dataXY$`SNP Name`==snp)
+plot.data <- data.frame(X=dataXY$X[ix],
+                        Y=dataXY$Y[ix],
+                        dosage=factor(geno[snp,dataXY$`Sample ID`[ix]])
+                        )
+
+library(ggplot2)
+ggplot(data=plot.data,aes(x=X,y=Y,colour=dosage)) + geom_point() + scale_colour_brewer(palette="Set1") + coord_fixed(ratio=1) + xlim(c(0,1)) + ylim(c(0,1)) + ggtitle(snp)
+```
+
+## Pedigree analysis
+Genome-wide markers are very useful for quality control in a breeding program, including to ensure seed mixtures have not occurred and to check the accuracy of the recorded parentage. A pedigree file for the 9 potato clones in the sample dataset is provided with the vignette:
+```{r}
+pedfile <- system.file("vignette_data", "potato_pedigree.csv", package = "polyBreedR")
+ped <- read.csv(pedfile,as.is=T,na.strings="NA")
+nrow(ped)
+tail(ped)
+```
+
+The full pedigree has 70 ancestors. Portions of the pedigree for certain individuals can be extracted with the function `get_pedigree`:
+```{r}
+id <- colnames(geno)
+ped1 <- get_pedigree(id = id[1],pedfile=pedfile,na.string="NA")
+nrow(ped1)
+
+ped2 <- get_pedigree(id = id[1:2],pedfile=pedfile,na.string="NA")
+nrow(ped2)
+
+print(parentage <- ped[ped$id %in% id,])
+```
+
+By subsetting the pedigree to just the 9 genotyped individuals, we see they are derived from 7 parents, which were genotyped years earlier using Version 1 of the potato SNP array. The Version 1 array had 8303 markers, and allele dosage data for 4167 of these markers for the 7 parents are provided with the vignette. 
+```{r}
+V1datafile <- system.file("vignette_data", "potato_V1array_geno.csv", package = "polyBreedR")
+geno.parents <- as.matrix(read.csv(V1datafile,check.names=F,row.names=1))
+str(geno.parents)
+```
+
+When both parents of an individual have been genotyped, the function `check_trio` can be used to calculate what percent of the markers are inconsistent (using a random bivalents model). For example, if the mother has dosage 0 and father has dosage 1, then only dosage values of 0 and 1 are possible in the offspring. Because the parents and progeny were genotyped with different versions of the array, we need to first combine the two genotype matrices using only the markers in common:
+```{r}
+common.marks <- intersect(rownames(geno.parents),rownames(geno))
+geno2 <- cbind(geno.parents[common.marks,],geno[common.marks,])
+str(geno2)
+
+trio.ans <- check_trio(parentage=parentage,geno=geno2,ploidy=4)
+trio.ans
+```
+
+For correct trios, the percent error is limited by the accuracy of the genotype data. Based on checking hundreds of trios, approximately 1% error is expected when using the model parameter file included with the vignette. Values much higher than this indicate the parentage is incorrect. To illustrate, we will replace MSR127-2 with Nicolet in the parentage of the last individual to introduce a pedigree error:
+```{r}
+ped_with_error <- ped
+ped_with_error$father[ped_with_error$id=="W16130-10"] <- "Nicolet"
+parentage_with_error <- ped_with_error[ped_with_error$id %in% id,]
+check_trio(parentage=parentage_with_error,geno=geno2,ploidy=4)
+```
+
+In this example, the incorrect parentage leads to almost 10% error. The plotting function `GvsA` can be used to determine which parent is wrong and identify the correct parent if it is in the dataset. G refers to the additive relationship matrix from markers, and A is the additive relationship from pedigree, which can be computed using the `G_coeff` and `A_mat` functions, respectively. 
+```{r}
+Gans <- G_coeff(geno=geno2,ploidy=4)
+G <- tcrossprod(Gans$coeff/Gans$scale)
+A <- A_mat(ped=ped,ploidy=4)
+A <- A[rownames(G),colnames(G)]
+
+A_error <-  A_mat(ped=ped_with_error,ploidy=4)
+A_error <- A_error[rownames(G),colnames(G)]
+
+#Plot with correct parentage
+GvsA(parentage[9,],G,A)
+```
+
+The above figure shows the expected positive correlation between G and A when the parentage is correct, with the parents and any full-siblings (W16105-1 in this example) in the upper right corner, and more distantly related individuals in the lower left. You can control which points get labeled using the parameters `thresh.G` and `thresh.A`. Now look at the plot when the parentage is incorrect:
+
+```{r}
+GvsA(parentage_with_error[9,],G,A_error,thresh.G=0.1)
+```
+
+The position of W6609-3 looks appropriate, but the G coefficient with Nicolet is too small for it to be the parent. Conversely, the G coefficient with MSR127-2 is too high relative to its A coefficient, which suggests it is the missing parent.
+
