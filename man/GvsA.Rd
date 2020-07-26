@@ -4,7 +4,16 @@
 \alias{GvsA}
 \title{Plot G vs. A}
 \usage{
-GvsA(parentage, G, A, filename = NULL, thresh.G = Inf, thresh.A = 0.5)
+GvsA(
+  parentage,
+  G,
+  A,
+  filename = NULL,
+  thresh.G = Inf,
+  thresh.A = 0.5,
+  Gmax = NULL,
+  Amax = NULL
+)
 }
 \arguments{
 \item{parentage}{Data frame of individuals to plot, with 3 columns: id,mother,father}
@@ -18,6 +27,10 @@ GvsA(parentage, G, A, filename = NULL, thresh.G = Inf, thresh.A = 0.5)
 \item{thresh.G}{Threshold above which names are displayed (default Inf)}
 
 \item{thresh.A}{Threshold above which names are displayed (default 0.5)}
+
+\item{Gmax}{Upper limit for y-axis for plotting. If NULL, maximum value in G is used.}
+
+\item{Amax}{Upper limit for x-axis for plotting. If NULL, maximum value in A is used.}
 }
 \description{
 Plot marker-based vs. pedigree-based additive relationship coefficients
