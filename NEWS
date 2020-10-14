@@ -1,2 +1,6 @@
+Changes in v0.12
+* Changed G_coeff to G_mat
+* Added several new functions for genomic selection
+
 Changes in v0.11
 * Options for axis limits in GvsA

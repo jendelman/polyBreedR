@@ -96,10 +96,10 @@ parentage_with_error <- ped_with_error[ped_with_error$id %in% id,]
 check_trio(parentage=parentage_with_error,geno=geno2,ploidy=4)
 ```
 
-In this example, the incorrect parentage leads to almost 10% error. The plotting function `GvsA` can be used to determine which parent is wrong and identify the correct parent if it is in the dataset. G refers to the additive relationship matrix from markers, and A is the additive relationship from pedigree, which can be computed using the `G_coeff` and `A_mat` functions, respectively. 
+In this example, the incorrect parentage leads to almost 10% error. The plotting function `GvsA` can be used to determine which parent is wrong and identify the correct parent if it is in the dataset. G refers to the additive relationship matrix from markers, and A is the additive relationship from pedigree, which can be computed using the `G_mat` and `A_mat` functions, respectively. 
 ```{r}
-Gans <- G_coeff(geno=geno2,ploidy=4)
-G <- tcrossprod(Gans$coeff/Gans$scale)
+Gans <- G_mat(geno=geno2,ploidy=4)
+G <- Gans$mat
 A <- A_mat(ped=ped,ploidy=4)
 A <- A[rownames(G),colnames(G)]
 
