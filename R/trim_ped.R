@@ -18,7 +18,11 @@ trim_ped <- function(ped,focal) {
   }
   
   founders <- setdiff(ped$id[which(ped$parent1==0 & ped$parent2==0)],focal)
-  n.child <- sapply(apply(array(founders),1,children.id,ped=ped),length)
+  nf <- length(founders)
+  n.child <- numeric(nf)
+  for (i in 1:nf) {
+    n.child[i] <- length(children.id(id=founders[i],ped=ped))
+  } 
   remove.id <- founders[which(n.child==1)]
   if (length(remove.id)==0) {
     return(ped)

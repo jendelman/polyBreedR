@@ -1,3 +1,7 @@
+Changes in v0.13
+* Removed some poor markers from V3array_model
+* Fixed error with trim_ped
+
 Changes in v0.12
 * Changed G_coeff to G_mat
 * Added several new functions for genomic selection

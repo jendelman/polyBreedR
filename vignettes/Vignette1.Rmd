@@ -26,7 +26,7 @@ str(data)
 hist(data)
 ```
 
-As shown above, the output from `readXY` is a matrix with dimensions [markers x individuals], and the data values are the ratio Y/(X+Y), which varies from 0 to 1 and is an analog measure of allele dosage (theta values are also possible; see the manual). Several methods are available for classifying this ratio into discrete values 0-4, including the normal mixture model implemented in R package [fitPoly](https://cran.r-project.org/web/packages/fitPoly/index.html). Two thousand potato samples were used to fit the model for each marker, and 11,388 SNPs remained after filtering. The model file provided with the package contains 15 columns: five means, five standard deviations, and 5 mixture probabilities.
+As shown above, the output from `readXY` is a matrix with dimensions [markers x individuals], and the data values are the ratio Y/(X+Y), which varies from 0 to 1 and is an analog measure of allele dosage (theta values are also possible; see the manual). Several methods are available for classifying this ratio into discrete values 0-4, including the normal mixture model implemented in R package [fitPoly](https://cran.r-project.org/web/packages/fitPoly/index.html). Two thousand potato samples were used to fit the model for each marker, and 11,043 SNPs remained after filtering. The model file provided with the package contains 15 columns: five means, five standard deviations, and 5 mixture probabilities.
 ```{r}
 model.filename <- system.file("vignette_data", "potato_V3array_model.csv", package = "polyBreedR")
 model.params <- read.csv(model.filename)

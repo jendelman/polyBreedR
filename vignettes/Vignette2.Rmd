@@ -31,7 +31,7 @@ parents  #21 tetraploid parents
 intersect(parents,id) #two parents included
 ```
 
-Several methods are available for classifying the allele ratio into discrete values 0-4, including the normal mixture model implemented in R package [fitPoly](https://cran.r-project.org/web/packages/fitPoly/index.html). Two thousand potato samples were used to fit the model for each marker, and 11,388 SNPs remained after filtering. The model file provided with the package contains 15 columns: five means, five standard deviations, and 5 mixture probabilities. To detect aneuploids or tetraploids, we will initially treat the dihaploid samples as tetraploid when using `geno_call`:
+Several methods are available for classifying the allele ratio into discrete values 0-4, including the normal mixture model implemented in R package [fitPoly](https://cran.r-project.org/web/packages/fitPoly/index.html). Two thousand potato samples were used to fit the model for each marker, and 11,043 SNPs remained after filtering. The model file provided with the package contains 15 columns: five means, five standard deviations, and 5 mixture probabilities. To detect aneuploids or tetraploids, we will initially treat the dihaploid samples as tetraploid when using `geno_call`:
 ```{r}
 model.filename <- system.file("vignette_data", "potato_V3array_model.csv", package = "polyBreedR")
 model <- read.csv(model.filename,check.names=F,row.names=1)
