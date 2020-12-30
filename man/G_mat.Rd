@@ -7,7 +7,7 @@
 G_mat(geno, ploidy)
 }
 \arguments{
-\item{geno}{Matrix of allele dosages: markers x indiv}
+\item{geno}{Matrix of allele dosages (markers x indiv)}
 
 \item{ploidy}{2 or 4}
 }

@@ -2,10 +2,14 @@
 #' 
 #' Direct Sum
 #' 
+#' Computes the direct sum of the matrices in \code{x}
+#' 
 #' @param x list of matrices
 #' 
 #' @return Sparse Matrix
 #' @import Matrix
+#' 
+#' @keywords internal
 #' 
 direct_sum <- function(x) {
   n <- length(x) 

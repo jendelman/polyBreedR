@@ -15,3 +15,7 @@ Sparse Matrix
 \description{
 Direct Sum
 }
+\details{
+Computes the direct sum of the matrices in \code{x}
+}
+\keyword{internal}
