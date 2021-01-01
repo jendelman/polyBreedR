@@ -9,7 +9,7 @@ Stage1(
   traits,
   fixed = NULL,
   random = NULL,
-  silent = FALSE,
+  silent = TRUE,
   workspace = "500mb",
   pworkspace = "500mb"
 )

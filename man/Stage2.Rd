@@ -4,24 +4,18 @@
 \alias{Stage2}
 \title{Stage 2 analysis of multi-environment trials (still under development)}
 \usage{
-Stage2(
-  data,
-  fixed = NULL,
-  silent = FALSE,
-  workspace = "500mb",
-  pworkspace = "500mb"
-)
+Stage2(data, fixed = NULL, kernels = NULL, silent = TRUE, workspace = "500mb")
 }
 \arguments{
 \item{data}{Data frame with BLUEs from Stage 1 (see Details)}
 
 \item{fixed}{Additional fixed effects, as a character vector}
 
+\item{kernels}{Character vector with the names of variance-covariance matrices for genetic effects (see Details)}
+
 \item{silent}{TRUE/FALSE, whether to suppress ASReml-R output}
 
 \item{workspace}{Memory limit for ASRreml-R variance estimation}
-
-\item{pworkspace}{Memory limit for ASRreml-R BLUP computation}
 }
 \value{
 List containing
@@ -29,14 +23,14 @@ List containing
 \item{aic}{AIC}
 \item{fixed}{Fixed effect estimates and SE}
 \item{vc}{Variance component estimates and SE}
-\item{blup}{BLUPs and reliability (r2) for breeding values if G present or genotypic values if G not present}
+\item{MME}{Variable of class \code{\link{MME}}}
 }
 }
 \description{
 Stage 2 analysis of multi-environment trials
 }
 \details{
-Stage 2 of the two-stage approach described by Damesa et al. 2017, using ASReml-R for variance component estimation (license is required). The variable \code{data} must contain at least three columns: env, id, blue. The first column (env) is the environment identifier, which in plant breeding typically represents a location x year combination. The second column (id) is the genotype identifier, and the third column (blue) is the BLUE from Stage 1 (NAs are not allowed). There are two other reserved column names, which are optional: expt, loc. By default, a fixed effect for each environment is included, but there are situations where BLUEs from multiple experiments (expt) in one environment are included, in which case "expt" overrides "env" to specify the fixed effect portion of the model. When the population of environments includes multiple locations with more than one environment per location, "loc" leads to the inclusion of random effects for genotype x location. For more than 3 locations, a first-order factor-analytic model is used to reduce model complexity. Additional fixed effects can be specified using ASReml-R syntax with the argument \code{fixed} (make sure they have the correct type in \code{data}: numeric vs. factor). To model the uncertainty in the BLUEs from Stage 1 in Stage 2, an additional random effect is included with a constrained variance-covariance matrix named \code{Omega} (following the notation of Damesa et al. 2017). Due to limitations with ASReml-R, this variable must be defined globally instead of passing it to the function. The function \code{\link{Stage2_prep}} can be used to prepare both \code{data} and \code{Omega}. The main effect for genotype can also be partitioned into additive and non-additive effects by defining a global variable named \code{G} for the G matrix. If there are individuals in \code{data} but not in \code{G}, an error is returned. To make predictions for unphenotyped individuals, include them in \code{G}. By default, the workspace and pworkspace limits for ASReml-R are set at 500mb. If you get an error about insufficient memory, try increasing the appropriate value (workspace for variance estimation and pworkspace for BLUP computation).
+Stage 2 of the two-stage approach described by Damesa et al. 2017, using ASReml-R for variance component estimation (license is required). The variable \code{data} must contain at least three columns: env, id, blue. The first column (env) is the environment identifier, which in plant breeding typically represents a location x year combination. The second column (id) is the genotype identifier, and the third column (blue) is the BLUE from Stage 1 (NAs are not allowed). There are two other reserved column names, which are optional: expt, loc. By default, a fixed effect for each environment is included, but there are situations where BLUEs from multiple experiments (expt) in one environment are included, in which case "expt" overrides "env" to specify the fixed effect portion of the model. When the population of environments includes multiple locations with more than one environment per location, "loc" leads to the inclusion of random effects for genotype x location. For more than 3 locations, a first-order factor-analytic model is used to reduce model complexity. Additional fixed effects can be specified using ASReml-R syntax with the argument \code{fixed} (make sure they have the correct type in \code{data}: numeric vs. factor). To model the uncertainty in the BLUEs from Stage 1 in Stage 2, an additional random effect is included with a variance-covariance matrix that must be named "Omega" (notation in Damesa et al. 2017). Due to limitations with ASReml-R, this variable must be defined globally instead of passing it to the function. The function \code{\link{Stage2_prep}} can be used to prepare both \code{data} and Omega. By default, the model includes independent random effects for genotype (id). Additional genetic effects with specific covariance structure (such as the G matrix for genomic breeding values) can be included using the argument \code{kernels}, which is a vector of variable names (for example, "G"). (Do not use the name "I" for a kernel; it is reserved for the independent genetic effect.) All individuals in \code{data} must be present in the kernel matrices, but the kernels can contain individuals not in \code{data} to make predictions for unphenotyped individuals using \code{\link{predict_MME}}. All kernel matrices must have the same rownames attribute. By default, the workspace memory for ASReml-R is set at 500mb. If you get an error about insufficient memory, try increasing it.
 }
 \references{
 Damesa et al. 2017. Agronomy Journal 109: 845-857. doi:10.2134/agronj2016.07.0395

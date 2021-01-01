@@ -18,11 +18,12 @@ direct_sum <- function(x) {
   i=1
   z <- expand.grid(col=1:m[i],row=1:m[i])
   out <- data.frame(row=z$row,col=z$col,value=as.vector(x[[i]]))
-  for (i in 2:n) {
-    z <- expand.grid(col=(1:m[i])+m.cumulative[i-1],row=(1:m[i])+m.cumulative[i-1])
-    tmp <- data.frame(row=z$row,col=z$col,value=as.vector(x[[i]]))
-    out <- rbind(out,tmp)
+  if (n > 1) {
+    for (i in 2:n) {
+      z <- expand.grid(col=(1:m[i])+m.cumulative[i-1],row=(1:m[i])+m.cumulative[i-1])
+      tmp <- data.frame(row=z$row,col=z$col,value=as.vector(x[[i]]))
+      out <- rbind(out,tmp)
+    }
   }
-  #return(out)
   return(sparseMatrix(i=out[,1],j=out[,2],x=out[,3]))
 }

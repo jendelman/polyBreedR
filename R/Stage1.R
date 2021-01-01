@@ -25,7 +25,7 @@
 #' @importFrom stats complete.cases
 #' @export
 
-Stage1 <- function(data,traits,fixed=NULL,random=NULL,silent=FALSE,workspace="500mb",pworkspace="500mb") {
+Stage1 <- function(data,traits,fixed=NULL,random=NULL,silent=TRUE,workspace="500mb",pworkspace="500mb") {
   
   stopifnot(requireNamespace("asreml"))
   stopifnot(all(traits %in% colnames(data)))
@@ -100,7 +100,7 @@ Stage1 <- function(data,traits,fixed=NULL,random=NULL,silent=FALSE,workspace="50
   blup.model <- paste0(blup.model,x)
   blue.model <- paste0(blue.model,x)
 
-  print("Estimating variance components...")
+  cat("Estimating variance components...\n")
   asreml.options(workspace=workspace,pworkspace=pworkspace,maxit=30,trace=!silent)
   blup.ans <- eval(parse(text=blup.model))
   blue.ans <- eval(parse(text=blue.model))
@@ -137,7 +137,7 @@ Stage1 <- function(data,traits,fixed=NULL,random=NULL,silent=FALSE,workspace="50
     diag(h2) <- diag(Vg/(Vg+Ve))
   }
   
-  print("Computing BLUEs...")
+  cat("Computing BLUEs...\n")
   if (n.trait > 1) {
     predans <- predict(blue.ans,classify="id:trait",vcov = TRUE)
     BLUE <- as.data.frame(predans$pvals[,c(1,3,2)])
