@@ -76,7 +76,7 @@ Stage2 <- function(data,fixed=NULL,kernels=NULL,silent=TRUE,workspace="500mb") {
     fixed.effects <- "expt"
   }
   
-  random.effects <- "id(id)+vm(units,source=Omega)"
+  random.effects <- "id(id)+vm(units,source=Omega,singG='PSD')"
   if (is.element("loc",x)) {
     stop("Not working yet for multiple locations")
     data$loc <- factor(as.character(data$loc))
