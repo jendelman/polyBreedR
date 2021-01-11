@@ -1,3 +1,6 @@
+Changes in 0.17
+* Updated sparse matrix handling for stage wise analysis
+
 Changes in 0.16
 * Added PSD to Omega in Stage2
 

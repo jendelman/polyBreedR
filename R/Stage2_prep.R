@@ -62,7 +62,7 @@ Stage2_prep <- function(data,id=NULL) {
     data2 <- rbind(data2,tmp)
     omega[[i]] <- data[[i]]$vcov[ix,ix]
   }
-  Omega <- as.matrix(direct_sum(omega))
+  Omega <- direct_sum(omega)
   attr(Omega,"INVERSE") <- FALSE
   rownames(Omega) <- colnames(Omega) <- 1:nrow(data2)
   

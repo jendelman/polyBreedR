@@ -142,11 +142,12 @@ Stage1 <- function(data,traits,fixed=NULL,random=NULL,silent=TRUE,workspace="500
     predans <- predict(blue.ans,classify="id:trait",vcov = TRUE)
     BLUE <- as.data.frame(predans$pvals[,c(1,3,2)])
     colnames(BLUE) <- c("id","blue","trait")
+    BLUE$trait <- as.character(BLUE$trait)
   } else {
     predans <- predict(blue.ans,classify="id",vcov = TRUE)
     BLUE <- as.data.frame(predans$pvals[,1:2])
     colnames(BLUE) <- c("id","blue")
   }
-
+  BLUE$id <- as.character(BLUE$id)
   return(list(aic=summary(blue.ans)$aic,blue=BLUE,vcov=predans$vcov,h2=h2))
 }
