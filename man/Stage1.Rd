@@ -7,42 +7,38 @@
 Stage1(
   data,
   traits,
-  fixed = NULL,
-  random = NULL,
+  effects = NULL,
   silent = TRUE,
   workspace = "500mb",
   pworkspace = "500mb"
 )
 }
 \arguments{
-\item{data}{Data frame with phenotype data}
+\item{data}{data frame with phenotype data}
 
-\item{traits}{Vector of column names from \code{data}}
+\item{traits}{vector of column names from \code{data}}
 
-\item{fixed}{Vector of column names from \code{data}}
-
-\item{random}{Vector of column names from \code{data}}
+\item{effects}{list of other effects in the model}
 
 \item{silent}{TRUE/FALSE, whether to suppress ASReml-R output}
 
-\item{workspace}{Memory limit for ASRreml-R variance estimation}
+\item{workspace}{memory limit for ASRreml-R variance estimation}
 
-\item{pworkspace}{Memory limit for ASRreml-R BLUE computation}
+\item{pworkspace}{memory limit for ASRreml-R BLUE computation}
 }
 \value{
 List containing
 \describe{
-\item{aic}{AIC from ASReml-R}
-\item{blue}{data frame of BLUEs}
-\item{vcov}{variance-covariance matrix of the BLUEs}
-\item{h2}{matrix with heritability, genetic, and residual correlations (see Details)}
+\item{H2}{matrix of broad-sense heritability for each env x trait combination}
+\item{blue}{data frame of BLUEs for id x traits}
+\item{blue.vcov}{list of BLUE + variance-covariance matrices (one matrix per trait)}
 }
 }
 \description{
 Stage 1 analysis of multi-environment trials
 }
 \details{
-Stage 1 of the two-stage approach described by Damesa et al. 2017, using ASReml-R for variance component estimation (license is required). The variable \code{data} must have a column labeled "id" with the names of the different genotypes (i.e., clones or individuals). To include other variables (besides "id") in the model, include them in \code{fixed} or \code{random} as appropriate, and make sure they have the correct type in the data frame: factor vs. numeric. If multiple traits are included, a multivariate analysis is performed, and only plots with data for all traits are included. The \code{h2} matrix returned by the function contains the estimated genetic correlations above the diagonal, residual correlations below the diagonal, and plot-based heritability on the diagonal. For multivariate analysis, the data frame \code{blue} returned by the function is in long format, with a column named "trait". By default, the workspace and pworkspace limits for ASReml-R are set at 500mb. If you get an error about insufficient memory, try increasing the appropriate value (workspace for variance estimation and pworkspace for BLUE computation).
+Stage 1 of the two-stage approach described by Damesa et al. 2017, using ASReml-R for variance component estimation (license is required). The variable \code{data} must have one column labeled "id" for the individuals,  one labeled "env" for the environments, plus columns for each of the traits to be analyzed. The data for each environment x trait combination are analyzed independently with a linear mixed model. Argument \code{effects} is a named list of character vectors to specify other effects in the model. Each vector has two elements: the first is "fixed" or "random", and the second is "factor" or "numeric". For example, to include a random block effect, use \code{effects=list(block=c("random","factor"))}. To include stand.count as a numeric covariate, use \code{effects=list(stand.count=c("fixed","numeric"))}. By default, the workspace and pworkspace limits for ASReml-R are set at 500mb. If you get an error about insufficient memory, try increasing the appropriate value (workspace for variance estimation and pworkspace for BLUE computation).
 }
 \references{
 Damesa et al. 2017. Agronomy Journal 109: 845-857. doi:10.2134/agronj2016.07.0395

@@ -2,7 +2,7 @@
 % Please edit documentation in R/direct_sum.R
 \name{direct_sum}
 \alias{direct_sum}
-\title{Direct Sum}
+\title{Direct Sum for Symmetric Matrices}
 \usage{
 direct_sum(x)
 }
@@ -13,7 +13,7 @@ direct_sum(x)
 Sparse Matrix
 }
 \description{
-Direct Sum
+Direct Sum for Symmetric Matrices
 }
 \details{
 Computes the direct sum of the matrices in \code{x}

@@ -1,3 +1,8 @@
+Changes in 0.18
+* Completed Vignette 3 for genomic selection.
+* Modifications to Stage1, Stage2_prep, Stage2
+* Added function dart_tag
+
 Changes in 0.17
 * Updated sparse matrix handling for stage wise analysis
 

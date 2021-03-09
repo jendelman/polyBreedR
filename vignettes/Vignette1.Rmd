@@ -1,5 +1,5 @@
 ---
-title: "polyBreedR Vignette #1: SNP array and pedigree data"
+title: "polyBreedR Vignette 1: SNP array and pedigree data"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{polyBreedR Vignette1}
@@ -8,9 +8,7 @@ vignette: >
 ---
 
 ```{r include=FALSE}
-library(knitr)
-library(rmarkdown)
-knitr::opts_chunk$set(echo = TRUE,collapse=FALSE,comment="##",fig.width=5,fig.height=5)
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE,comment="##",fig.width=5,fig.height=5)
 ```
 
 ## Genotype calls from SNP array intensities

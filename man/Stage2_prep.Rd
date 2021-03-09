@@ -4,24 +4,25 @@
 \alias{Stage2_prep}
 \title{Prepare data for Stage 2 analysis of multi-environment trials}
 \usage{
-Stage2_prep(data, id = NULL)
+Stage2_prep(data, exclude.id = character(0), exclude.env = character(0))
 }
 \arguments{
-\item{data}{Named list containing output from Stage 1 (see Details)}
+\item{exclude.id}{vector of individuals to exclude}
 
-\item{id}{Vector of genotype identifiers to include (default is all)}
+\item{exclude.env}{vector of envs to exclude}
+
+\item{blue.vcov}{named list of blue.vcov matrices from Stage 1}
 }
 \value{
-A list containing
+a list containing
 \describe{
 \item{blue}{data frame of BLUEs}
 \item{Omega}{variance-covariance matrix of BLUEs}
 }
-For multiple traits, the Omega variable is a list of matrices, one for each trait.
 }
 \description{
 Prepare data for Stage 2 analysis of multi-environment trials
 }
 \details{
-Designed to prepare data files for \code{\link{Stage2}} based on output from \code{\link{Stage1}}. Each element of \code{data} is a list that contains at least two variables: "blue" and "vcov". The "blue" variable is a data frame with columns named "id" and "blue", and if multiple traits have been analyzed in Stage 1, there can be a third column named "trait". The "vcov" variable is the variance-covariance matrix of the BLUEs. By default, the function treats each element of \code{data} as a different environment, which in plant breeding typically represents a location x year combination. If data from multiple experiments per environment are included, each element of \code{data} should also contain the variable "env" to specify the environment name. Furthermore, when the dataset includes multiple locations with more than one environment per location, include "loc" for each element of \code{data} to model genotype x location effects.
+Designed to prepare data files for \code{\link{Stage2}} based on output from \code{\link{Stage1}}. Each element of \code{blue.vcov} is a matrix for one trait, with the first column containing BLUEs and the remainder is their variance-covariance. The rownames are the id and env concatenated with ":". The output \code{blue} is a data frame with id, env, and trait (when multiple traits are provided). This allows for multi-trait analysis in Stage 2.
 }
