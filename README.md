@@ -34,7 +34,7 @@ ploidy and parentage. Financial support has come from USDA NIFA Awards
 2014-67013-22434 (AFRI) and 2019-51181-30021 (SCRI).
 
 [Vignette
-3](https://jendelman.github.io/polyBreedR/polyBreedR_Vignette2.html)
+3](https://jendelman.github.io/polyBreedR/polyBreedR_Vignette3.html)
 covers genomic selection and is based on [Endelman et
 al. (2018)](https://doi.org/10.1534/genetics.118.300685). Financial
 support has come from USDA NIFA Hatch Projects 1002731 and 1013047 and

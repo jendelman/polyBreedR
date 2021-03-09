@@ -4,14 +4,14 @@
 \alias{Stage2_prep}
 \title{Prepare data for Stage 2 analysis of multi-environment trials}
 \usage{
-Stage2_prep(data, exclude.id = character(0), exclude.env = character(0))
+Stage2_prep(blue.vcov, exclude.id = character(0), exclude.env = character(0))
 }
 \arguments{
+\item{blue.vcov}{named list of blue.vcov matrices from Stage 1}
+
 \item{exclude.id}{vector of individuals to exclude}
 
 \item{exclude.env}{vector of envs to exclude}
-
-\item{blue.vcov}{named list of blue.vcov matrices from Stage 1}
 }
 \value{
 a list containing

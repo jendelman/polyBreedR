@@ -16,7 +16,7 @@
 #' 
 #' @export
 
-Stage2_prep <- function(data,exclude.id=character(0),exclude.env=character(0)) {
+Stage2_prep <- function(blue.vcov,exclude.id=character(0),exclude.env=character(0)) {
   
   traits <- names(data)
   n.trait <- length(data)
