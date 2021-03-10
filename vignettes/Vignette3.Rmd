@@ -114,8 +114,8 @@ The above figure shows the distribution of plot-based $H^2$ for the 6 enviroment
 
 Clones without marker data need to be removed from the Stage 1 results before continuing to Stage 2, which is one of the features of `Stage2_prep`. This function also returns a matrix called Omega, which must be saved as a variable in the global environment for ASReml-R to work properly in `Stage2`. The same is true for the G matrix (created above) and other covariance matrices, which are called "kernels" in `Stage2`. The `Stage2` function automatically includes a random genetic effect with an identity (I) variance-covariance matrix, which represents non-additive effects when used in combination with a random effect with covariance proportional to G. At present, each trait must be analyzed separately in Stage 2, but a multivariate analysis to estimate the genetic correlation between traits is under development. Let's analyze total yield.
 ```{r}
-missing.id <- setdiff(ans1$blue$id,rownames(G))
-ans1b <- Stage2_prep(ans1$blue.vcov["total.yield"],exclude.id=missing.id)
+not.genotyped <- setdiff(ans1$blue$id,rownames(G))
+ans1b <- Stage2_prep(ans1$blue.vcov["total.yield"],exclude.id=not.genotyped)
 Omega <- ans1b$Omega
 blue <- ans1b$blue
 ans2 <- Stage2(data=blue,kernels="G",silent=F)
@@ -184,13 +184,13 @@ Because these are *marker-assisted* predictions, meaning they also utilize pheno
 mean(combo$r2[combo$plots==1])
 ```
 
-polyBreedR has two ways to make *marker-based* predictions, i.e., for individuals without phenotype data. In a real situation (as opposed to cross-validation), the G matrix will contain individuals for which BLUEs are not available in the data frame provided to `Stage2`, and predictions for these individuals will be present in the output from `predict_MME`. For cross-validation exercises, it is more efficient to mask individuals with the argument "exclude.id" in the call to `predict_MME`, rather than re-estimating variances for each partition of the dataset using `Stage2`. 
+polyBreedR has two ways to make *marker-based* predictions, i.e., for individuals without phenotype data. In a real situation (as opposed to cross-validation), the G matrix will contain individuals for which BLUEs are not available in the data frame provided to `Stage2`, and predictions for these individuals will be present in the output from `predict_MME`. For cross-validation exercises, it is more efficient to mask the phenotypes of individuals using the argument "mask" in `predict_MME`, rather than re-estimating variances for each partition of the dataset using `Stage2`. 
 
 To illustrate, we will mask phenotypes for the clones in the 2020 preliminary yield trial (Field Year 3), which all start with the prefix "W17". 
 
 ```{r,fig.height=3,fig.width=4}
 W17 <- blue$id[grep("W17",blue$id,fixed=T)]
-add.pred.W17 <- predict_MME(data=ans2$MME,weights=c(I=0,G=1),exclude.id=W17)
+add.pred.W17 <- predict_MME(data=ans2$MME,weights=c(I=0,G=1),mask=W17)
 
 combo <- merge(add.pred.W17,add.pred,by="id")[,c("id","r2.x","r2.y")]
 combo$group <- ifelse(combo$id %in% W17,"W17","Remainder") 

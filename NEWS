@@ -1,5 +1,9 @@
+Changes in 0.21
+* Changed name of argument in predict_MME to mask
+* Conditioning of kernel matrices in Stage2
+
 Changes in 0.20
-* Fixed Stage2 for marker-based prediction
+* Changes in Stage2 
 
 Changes in 0.19
 * Added cross-validation to Vignette 3 and predict_MME
