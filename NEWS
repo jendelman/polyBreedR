@@ -1,3 +1,6 @@
+Changes in 0.20
+* Fixed Stage2 for marker-based prediction
+
 Changes in 0.19
 * Added cross-validation to Vignette 3 and predict_MME
 

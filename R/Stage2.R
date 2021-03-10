@@ -37,8 +37,6 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
   }
   stopifnot(all(c("id","blue","env") %in% colnames(data)))
   stopifnot(!is.na(data$blue))
-  data$id <- factor(as.character(data$id))
-  data$env <- factor(as.character(data$env))
   
   if ("trait" %in% colnames(data)) {
     data$Trait <- factor(as.character(data$trait))
@@ -58,8 +56,13 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     X <- Matrix(model.matrix(~env-1,data))
   }
   
+  data$env <- factor(as.character(data$env))
+  
   nK <- length(kernels) #number of non-identity kernels
-  if (nK > 0) {
+  if (nK==0) {
+    data$id <- factor(as.character(data$id))
+    id <- levels(data$id)
+  } else {
     stopifnot(!is.element("I",kernels))
     idK <- vector("list",nK)
     for (i in 1:nK) {
@@ -70,6 +73,8 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     }
     stopifnot(sapply(idK,function(z){all(z==idK[[1]])}))
     stopifnot(is.element(levels(data$id),idK[[1]]))
+    id <- sort(idK[[1]])
+    data$id <- factor(as.character(data$id),levels=id)
 
     if (multi.trait) {
       random.effects <- sub("us(Trait)","idh(Trait)",random.effects,fixed=T)
@@ -93,7 +98,6 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     Z <- Matrix(model.matrix(~id-1,data))
   }
   colnames(Z) <- sub("id","",colnames(Z),fixed=T)
-  id <- colnames(Z)
   
   asreml.options(workspace=workspace,maxit=30,trace=!silent)
   model <- sub(pattern="F",replacement=fixed.effects,model)
