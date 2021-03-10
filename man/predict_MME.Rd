@@ -4,14 +4,14 @@
 \alias{predict_MME}
 \title{Compute BLUPs by solving the Mixed Model Equations}
 \usage{
-predict_MME(data, weights = NULL, exclude = NULL)
+predict_MME(data, weights = NULL, exclude.id = NULL)
 }
 \arguments{
 \item{data}{Variable of class \code{\link{MME}}}
 
 \item{weights}{Named vector of weights for the genetic effects in BLUP. Default is 1 for all effects.}
 
-\item{exclude}{Vector of individuals to exclude from the training set (optional)}
+\item{exclude.id}{Vector of individuals to exclude from the training set (optional)}
 }
 \value{
 data frame with columns id,blup,r2
@@ -20,5 +20,5 @@ data frame with columns id,blup,r2
 Compute BLUPs by solving the Mixed Model Equations
 }
 \details{
-BLUPs are computed at the average value of the fixed effects. If \code{weights} is used, the names must exactly match the names of the kernels in \code{data}. Using the argument \code{exclude}, a subset of the population can be excluded, to enable cross-validation. The function \code{\link{Stage2}} can be used to create a suitable object of class \code{\link{MME}}.
+BLUPs are computed at the average value of the fixed effects. If \code{weights} is used, the names must exactly match the names of the kernels in \code{data}. Using the argument \code{exclude.id}, a subset of the population can be excluded, to enable cross-validation. The function \code{\link{Stage2}} can be used to create a suitable object of class \code{\link{MME}}.
 }

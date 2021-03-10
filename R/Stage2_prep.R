@@ -18,12 +18,12 @@
 
 Stage2_prep <- function(blue.vcov,exclude.id=character(0),exclude.env=character(0)) {
   
-  traits <- names(data)
-  n.trait <- length(data)
+  traits <- names(blue.vcov)
+  n.trait <- length(blue.vcov)
   vcov <- vector("list",n.trait)
   blue <- NULL
   for (i in 1:n.trait) {
-    tmp <- data[[i]]
+    tmp <- blue.vcov[[i]]
     tmp2 <- strsplit(rownames(tmp),split=":",fixed=T)
     id.i <- sapply(tmp2,"[",1)
     env.i <- sapply(tmp2,"[",2)
@@ -36,9 +36,9 @@ Stage2_prep <- function(blue.vcov,exclude.id=character(0),exclude.env=character(
   Omega <- direct_sum(vcov)
   attr(Omega,"INVERSE") <- FALSE
   rownames(Omega) <- colnames(Omega) <- 1:nrow(blue)
-  blue$id <- factor(blue$id)
-  blue$env <- factor(blue$env)
-  blue$trait <- factor(blue$trait)
+  #blue$id <- factor(blue$id)
+  #blue$env <- factor(blue$env)
+  #blue$trait <- factor(blue$trait)
   if (n.trait==1) {
     blue <- blue[,-match("trait",colnames(blue))] 
   }

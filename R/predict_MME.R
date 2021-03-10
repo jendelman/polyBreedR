@@ -2,17 +2,17 @@
 #' 
 #' Compute BLUPs by solving the Mixed Model Equations
 #' 
-#' BLUPs are computed at the average value of the fixed effects. If \code{weights} is used, the names must exactly match the names of the kernels in \code{data}. Using the argument \code{exclude}, a subset of the population can be excluded, to enable cross-validation. The function \code{\link{Stage2}} can be used to create a suitable object of class \code{\link{MME}}.
+#' BLUPs are computed at the average value of the fixed effects. If \code{weights} is used, the names must exactly match the names of the kernels in \code{data}. Using the argument \code{exclude.id}, a subset of the population can be excluded, to enable cross-validation. The function \code{\link{Stage2}} can be used to create a suitable object of class \code{\link{MME}}.
 #' 
 #' @param data Variable of class \code{\link{MME}}
 #' @param weights Named vector of weights for the genetic effects in BLUP. Default is 1 for all effects.
-#' @param exclude Vector of individuals to exclude from the training set (optional)
+#' @param exclude.id Vector of individuals to exclude from the training set (optional)
 #' 
 #' @return data frame with columns id,blup,r2
 #' @import Matrix
 #' @export
 #' 
-predict_MME <- function(data,weights=NULL,exclude=NULL) {
+predict_MME <- function(data,weights=NULL,exclude.id=NULL) {
   
   stopifnot(!is.na(data@y))
   n.random <- length(data@kernels)
@@ -31,11 +31,11 @@ predict_MME <- function(data,weights=NULL,exclude=NULL) {
   n <- length(id)
   stopifnot(sapply(idK,setequal,y=id))
   
-  if (!is.null(exclude)) {
-    exclude <- unique(as.character(exclude))
-    ix <- which(is.element(id,exclude))
+  if (!is.null(exclude.id)) {
+    exclude.id <- unique(as.character(exclude.id))
+    ix <- which(is.element(id,exclude.id))
     if (length(ix) > 0) {
-      remove <- as.integer(unlist(apply(data@Z[,ix],2,function(x){which(x==1)})))
+      remove <- as.integer(unlist(apply(as.matrix(data@Z[,ix]),2,function(x){which(x==1)})))
       if (length(remove)>0) {
         data@y <- data@y[-remove]
         data@X <- data@X[-remove,]

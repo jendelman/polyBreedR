@@ -1,8 +1,8 @@
 ---
-title: "polyBreedR Vignette 3: Genomic Selection"
+title: "polyBreedR Vignette 3: Introduction to Genomic Selection"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{polyBreedR Vignette2}
+  %\VignetteIndexEntry{polyBreedR Vignette3}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -44,12 +44,12 @@ ggplot(data=pheno,aes(x=env)) + geom_bar() + ylab("Number of plots") +
 
 As is typical of breeding trials, the majority of clones were tested in one year and then dropped, but there is sufficient replication across years to estimate genotype x year interactions.
 ```{r}
-tab <- table(pheno$id)
-replicated <- names(tab)[tab > 2]
-ans <- tapply(pheno$id,pheno$env,intersect,y=replicated)
+tab <- table(pheno$id,pheno$env)
+env.per.id <- apply(tab,1,function(x){sum(x>0)})
+replicated <- names(env.per.id)[env.per.id > 1]
 
-#Number of clones tested in more than one year
-sapply(ans,length)
+#Number of clones tested in more than one env
+sapply(tapply(pheno$id,pheno$env,intersect,y=replicated),length)
 ```
 
 
@@ -88,7 +88,7 @@ The above figure illustrates the typical, unimodal, zero-mean distribution of G 
 
 polyBreedR functions `Stage1` and `Stage2` implement the two-stage analysis methodology described earlier. Both require a license for ASReml-R (version 4.1.0.148 or later), which can be obtained from [VSN International](https://www.vsni.co.uk/software/asreml-r). The `Stage1` command expects columns named "id" and "env" in the input data frame, as well as columns for each trait. The data for each environment x trait combination are analyzed independently with a linear mixed model. Any additional fixed or random effects in the model are specified using "effects", which is a named list of 2-vectors as shown in the example below. For each effect, the first element must be "fixed" or "random", and the second element is "factor" or "numeric" (i.e., covariate). `Stage1` returns a list with three elements:
 
-* "H2" is a data frame of the plot-based, broad-sense heritability for each env x trait combination
+* "H2" is a matrix of the plot-based, broad-sense heritability for each env x trait combination
 
 * "blue" is a data frame of BLUEs for each individual x trait combination
 
@@ -143,9 +143,9 @@ ans2$aic - ans2b$aic
 ```
 
 
-### Genomic prediction
+### Genomic prediction by BLUP
 
-One additional function, `predict_MME`, is needed to predict the breeding values by BLUP in polyBreedR. As the name suggests, it is based on solving the Mixed Model Equations (MME). The necessary data for `predict_MME` are encapsulated in an S4 class called `MME`, which is returned by `Stage2` (but can also be created explicitly by advanced users). Inversion of the MME coefficient matrix enables computation of the reliability ($r^2$) of the BLUPs, which is the expected squared correlation between the true and predicted values. This quantity is analogus to narrow-sense $h^2$ and is an alternative to cross-validation (CV) for assessing genomic prediction accuracy. Cross-validation tends to underestimate prediction accuracy because the data used for validation are not true breeding values (to compensate, the correlation can be divided by narrow-sense $h$). On the other hand, reliability from the MME tends to overestimate accuracy because it assumes the model is correct.
+One additional function, `predict_MME`, is needed to predict the breeding values in polyBreedR. As the name suggests, it is based on solving the Mixed Model Equations (MME). The necessary data for `predict_MME` are encapsulated in an S4 class called `MME`, which is returned by `Stage2` (but can also be created explicitly by advanced users). Inversion of the MME coefficient matrix enables computation of the reliability ($r^2$) of the BLUPs, which is the expected squared correlation between the true and predicted values. This quantity is analogus to narrow-sense $h^2$ and is an alternative to cross-validation (CV) for assessing genomic prediction accuracy. Cross-validation tends to underestimate prediction accuracy because the data used for validation are not true breeding values (to compensate, the correlation can be divided by narrow-sense $h$). On the other hand, reliability from the MME tends to overestimate accuracy because it assumes the model is correct.
 
 The argument "weights" of `predict_MME` allows the user to specify what linear combination of genetic effects to predict. For parent selection based on additive values, use weights of 0 and 1 for the I and G kernels, respectively. To select on clonal values for variety release, both kernels should have weights of 1.
 ```{r,fig.height=4,fig.width=4}
@@ -182,5 +182,34 @@ Because these are *marker-assisted* predictions, meaning they also utilize pheno
 ```{r}
 #Average reliability based on one plot
 mean(combo$r2[combo$plots==1])
+```
+
+polyBreedR has two ways to make *marker-based* predictions, i.e., for individuals without phenotype data. In a real situation (as opposed to cross-validation), the G matrix will contain individuals for which BLUEs are not available in the data frame provided to `Stage2`, and predictions for these individuals will be present in the output from `predict_MME`. For cross-validation exercises, it is more efficient to mask individuals with the argument "exclude.id" in the call to `predict_MME`, rather than re-estimating variances for each partition of the dataset using `Stage2`. 
+
+To illustrate, we will mask phenotypes for the clones in the 2020 preliminary yield trial (Field Year 3), which all start with the prefix "W17". 
+
+```{r,fig.height=3,fig.width=4}
+W17 <- blue$id[grep("W17",blue$id,fixed=T)]
+add.pred.W17 <- predict_MME(data=ans2$MME,weights=c(I=0,G=1),exclude.id=W17)
+
+combo <- merge(add.pred.W17,add.pred,by="id")[,c("id","r2.x","r2.y")]
+combo$group <- ifelse(combo$id %in% W17,"W17","Remainder") 
+ggplot(combo,aes(x=r2.x,y=r2.y,colour=group)) + geom_point() + geom_abline(intercept=0,slope=1) + 
+  xlab(expression(r^2~"(-W17 phenotypes)")) + ylab(expression(r^2~"(+W17 phenotypes)")) + scale_colour_brewer(palette="Set1")
+```
+
+The above figure compares the reliability of the predicted additive values with (y-axis) and without (x-axis) phenotypes for the W17 group (black line = slope of 1). The reliability is substantially higher for the W17 clones when their phenotype data are included, which reinforces the difference between marker-assisted and marker-based predictions. For the rest of the population, there is a slight advantage to including the W17 phenotypes because they increase the training population size.
+
+To estimate accuracy by cross-validation, the correlation between the predicted and observed values for the W17 group is divided by the square-root of the narrow-sense $h^2$. The result of 0.49 is lower than the square-root of the mean reliability = 0.72, and the true value may be somewhere in between.
+
+```{r}
+#Predictive ability
+pred.ability <- cor(blue$blue[match(W17,blue$id)],add.pred.W17$blup[match(W17,add.pred.W17$id)])
+
+#Prediction accuracy by cross-validation
+pred.ability/sqrt(0.31)
+
+#Compared to square root of mean reliability
+sqrt(mean(add.pred.W17$r2[match(W17,add.pred.W17$id)]))
 ```
 

@@ -3,9 +3,10 @@ polyBreedR
 Jeffrey Endelman
 
 This R package was designed to facilitate the use of genome-wide markers
-for breeding autotetraploid (4x) species. The software has been
-developed and tested using data from the University of Wisconsin-Madison
-[potato breeding program](http://potatobreeding.cals.wisc.edu).
+for breeding autotetraploid (4x) species, but it also works for
+diploids! The software has been developed and tested using data from the
+University of Wisconsin-Madison [potato breeding
+program](http://potatobreeding.cals.wisc.edu).
 
 To install and load the package:
 
@@ -35,10 +36,10 @@ ploidy and parentage. Financial support has come from USDA NIFA Awards
 
 [Vignette
 3](https://jendelman.github.io/polyBreedR/polyBreedR_Vignette3.html)
-covers genomic selection and is based on [Endelman et
+covers genomic selection via two-stage analysis of multi-environment
+trials and is based on [Endelman et
 al. (2018)](https://doi.org/10.1534/genetics.118.300685). Financial
-support has come from USDA NIFA Hatch Projects 1002731 and 1013047 and
-Potatoes USA.
+support has come from USDA NIFA Hatch Project 1013047 and Potatoes USA.
 
 For a complete specification of the package functions, consult the
 [reference

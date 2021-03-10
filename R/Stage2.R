@@ -60,7 +60,6 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
   
   nK <- length(kernels) #number of non-identity kernels
   if (nK > 0) {
-    data$id <- as.character(data$id)
     stopifnot(!is.element("I",kernels))
     idK <- vector("list",nK)
     for (i in 1:nK) {
@@ -70,9 +69,8 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
       eval(parse(text=gsub("Q",kernels[i],"colnames(Q) <- rownames(Q)")))
     }
     stopifnot(sapply(idK,function(z){all(z==idK[[1]])}))
-    stopifnot(is.element(data$id,idK[[1]]))
-    data$id <- factor(data$id,levels=idK[[1]]) #expand iid effect to include all id in kernel matrices
-    
+    stopifnot(is.element(levels(data$id),idK[[1]]))
+
     if (multi.trait) {
       random.effects <- sub("us(Trait)","idh(Trait)",random.effects,fixed=T)
       random.effects <- paste0(random.effects,sub("Q",kernels[1],"+vm(id,source=Q,singG='PSD'):us(Trait)"))
@@ -95,6 +93,7 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     Z <- Matrix(model.matrix(~id-1,data))
   }
   colnames(Z) <- sub("id","",colnames(Z),fixed=T)
+  id <- colnames(Z)
   
   asreml.options(workspace=workspace,maxit=30,trace=!silent)
   model <- sub(pattern="F",replacement=fixed.effects,model)
@@ -140,12 +139,12 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
   vcnames <- rownames(vc)
   if (!multi.trait) {
     K[[1]] <- vc["id",1]*Diagonal(n=ncol(Z))
-    dimnames(K[[1]]) <- list(colnames(Z),colnames(Z))
+    dimnames(K[[1]]) <- list(id,id)
     if (nK > 0) {
       for (i in 1:nK) {
         j <- grep(paste("vm(id, source =",kernels[i]),vcnames,fixed=T)
         vcnames <- replace(vcnames,j,sub("Q",kernels[i],"kernel=Q"))
-        K[[i+1]] <- eval(parse(text=sub("Q",kernels[i],"Matrix(vc[j,1]*Q)")))
+        K[[i+1]] <- eval(parse(text=sub("Q",kernels[i],"Matrix(vc[j,1]*Q[id,id])")))
       }
     }
     vcnames[match("id",vcnames)] <- "kernel=I"
