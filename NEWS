@@ -1,3 +1,6 @@
+Changes in 0.22
+* Completed multi-trait functionality for Stage2 and predict_MME
+
 Changes in 0.21
 * Changed name of argument in predict_MME to mask
 * Conditioning of kernel matrices in Stage2

@@ -11,14 +11,18 @@ predict_MME(data, weights = NULL, mask = NULL)
 
 \item{weights}{named vector of weights for the genetic effects in BLUP. Default is 1 for all effects.}
 
-\item{mask}{names of individuals to exclude from the training set (optional)}
+\item{mask}{(optional) data frame with column "id" and optional columns "env", "trait"}
 }
 \value{
-data frame with columns id,blup,r2
+For single trait analysis, function returns a data frame with columns: id,blup,r2. For multi-trait analysis, a list is returned containing
+\describe{
+\item{blup}{data frame of blups}
+\item{r2}{data frame of reliabilities}
+}
 }
 \description{
 Compute BLUPs by solving the Mixed Model Equations
 }
 \details{
-BLUPs are computed at the average value of the fixed effects. If \code{weights} is used, the names must exactly match the names of the kernels in \code{data}. Using the argument \code{mask}, the phenotypes for a subset of the population can be masked, to enable cross-validation. The function \code{\link{Stage2}} can be used to create a suitable object of class \code{\link{MME}}.
+Use the function \code{\link{Stage2}} to create the object of class \code{\link{MME}}. BLUPs are computed at the average value of the fixed effects. If \code{weights} is used, the names must exactly match the names of the kernels in \code{data}. Using the argument \code{mask}, the phenotypes for a subset of the population can be masked, to enable cross-validation.
 }

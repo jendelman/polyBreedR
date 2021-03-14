@@ -11,13 +11,9 @@ S4 class for solving the mixed model equations
 \section{Slots}{
 
 \describe{
-\item{\code{y}}{response}
+\item{\code{data}}{data frame with id, env, blue, trait (optional)}
 
-\item{\code{X}}{design matrix for the fixed effects}
-
-\item{\code{Z}}{design matrix for random genetic effects. Colnames must match rownames of the matrices in \code{K}.}
-
-\item{\code{kernels}}{list of variance-covariance matrices for the genetic effects. Matrices must have the same rownames attribute.}
+\item{\code{kernels}}{list of variance-covariance matrices for the genetic effects}
 
 \item{\code{Rmat}}{residual variance-covariance matrix}
 }}

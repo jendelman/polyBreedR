@@ -119,15 +119,13 @@ ans1b <- Stage2_prep(ans1$blue.vcov["total.yield"],exclude.id=not.genotyped)
 Omega <- ans1b$Omega
 blue <- ans1b$blue
 ans2 <- Stage2(data=blue,kernels="G",silent=F)
-round(ans2$vc,1)
+round(ans2$vars,1)
 ```
 
-The output "vc" contains the estimated variance components, and the results for "kernel=G" and "kernel=I" correspond to additive and non-additive genetic effects. respectively. In this example, GxE refers to the genotype x year interaction because the data come from a single location. (A tutorial for multi-location datasets is under development.) To compute the proportion of variance, the variance component for G (and other non-identity) kernels must be multiplied by the mean of the diagonal elements.
-
+The output "vars" contains the estimated variance for each effect, and the results for "kernel=G" and "kernel=I" correspond to additive and non-additive genetic effects, respectively. (For kernels, the variance component is multiplied by the mean of the diagonal elements.) In this example, GxE refers to the genotype x year interaction because the data come from a single location. (A tutorial for multi-location datasets is under development.) 
 ```{r}
-tmp <- ans2$vc[,1]*c(1,mean(diag(G)),1,1)
-names(tmp) <- rownames(ans2$vc)
-round(tmp/sum(tmp),2)
+#proportion of variance
+ans2$vars/sum(ans2$vars)
 ```
 
 Genomic narrow-sense heritability, defined here as the proportion of variance for the additive effects, is estimated at 0.31 for total yield (on a plot basis).
@@ -147,7 +145,7 @@ ans2$aic - ans2b$aic
 
 One additional function, `predict_MME`, is needed to predict the breeding values in polyBreedR. As the name suggests, it is based on solving the Mixed Model Equations (MME). The necessary data for `predict_MME` are encapsulated in an S4 class called `MME`, which is returned by `Stage2` (but can also be created explicitly by advanced users). Inversion of the MME coefficient matrix enables computation of the reliability ($r^2$) of the BLUPs, which is the expected squared correlation between the true and predicted values. This quantity is analogus to narrow-sense $h^2$ and is an alternative to cross-validation (CV) for assessing genomic prediction accuracy. Cross-validation tends to underestimate prediction accuracy because the data used for validation are not true breeding values (to compensate, the correlation can be divided by narrow-sense $h$). On the other hand, reliability from the MME tends to overestimate accuracy because it assumes the model is correct.
 
-The argument "weights" of `predict_MME` allows the user to specify what linear combination of genetic effects to predict. For parent selection based on additive values, use weights of 0 and 1 for the I and G kernels, respectively. To select on clonal values for variety release, both kernels should have weights of 1.
+The argument "weights" of `predict_MME` allows the user to specify the linear combination of genetic effects to predict. For parent selection based on additive values, use weights of 0 and 1 for the I and G kernels, respectively. To select on clonal values for variety release, both kernels should have weights of 1.
 ```{r,fig.height=4,fig.width=4}
 add.pred <- predict_MME(data=ans2$MME,weights=c(I=0,G=1))
 head(add.pred[order(add.pred$blup,decreasing=T),]) #Top yielders
@@ -190,7 +188,8 @@ To illustrate, we will mask phenotypes for the clones in the 2020 preliminary yi
 
 ```{r,fig.height=3,fig.width=4}
 W17 <- blue$id[grep("W17",blue$id,fixed=T)]
-add.pred.W17 <- predict_MME(data=ans2$MME,weights=c(I=0,G=1),mask=W17)
+add.pred.W17 <- predict_MME(data=ans2$MME,weights=c(I=0,G=1),
+                            mask=data.frame(id=W17))
 
 combo <- merge(add.pred.W17,add.pred,by="id")[,c("id","r2.x","r2.y")]
 combo$group <- ifelse(combo$id %in% W17,"W17","Remainder") 

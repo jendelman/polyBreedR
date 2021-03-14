@@ -125,7 +125,7 @@ Stage1 <- function(data,traits,effects=NULL,silent=TRUE,workspace="500mb",pworks
         Ve <- vc[match("units!units",rownames(vc)),1]
         H2[j,i] <- round(Vg/(Vg+Ve),2)
   
-        predans <- predict(blue.ans,classify="id",vcov = TRUE)
+        predans <- predict.asreml(blue.ans,classify="id",vcov = TRUE)
         vcov[[j]] <- predans$vcov
         tmp <- data.frame(id=as.character(predans$pvals$id),env=envs[j],
                           blue=predans$pvals$predicted.value)

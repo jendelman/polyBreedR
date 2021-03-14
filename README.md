@@ -39,7 +39,8 @@ ploidy and parentage. Financial support has come from USDA NIFA Awards
 covers genomic selection via two-stage analysis of multi-environment
 trials and is based on [Endelman et
 al. (2018)](https://doi.org/10.1534/genetics.118.300685). Financial
-support has come from USDA NIFA Hatch Project 1013047 and Potatoes USA.
+support has come from USDA NIFA Hatch Project 1013047, SCRI Project
+2020-51181-32156, and Potatoes USA.
 
 For a complete specification of the package functions, consult the
 [reference
