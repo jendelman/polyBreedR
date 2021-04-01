@@ -16,10 +16,10 @@
 #' @export
 #' @importFrom utils read.csv
 
-geno_call <- function(data,filename,model.ploidy=4,sample.ploidy=4,min.posterior=0,transform=TRUE) {
+geno_call <- function(data,filename,model.ploidy=4L,sample.ploidy=4L,min.posterior=0,transform=TRUE) {
   stopifnot(sample.ploidy <= model.ploidy)
-  stopifnot(sample.ploidy %in% c(2,4))
-  stopifnot(model.ploidy %in% c(2,4))
+  stopifnot(sample.ploidy %in% c(2L,4L))
+  stopifnot(model.ploidy %in% c(2L,4L))
 
   model.params <- as.matrix(read.csv(file=filename,as.is=T,row.names = 1))
   iv <- which(rownames(data) %in% rownames(model.params))
@@ -35,7 +35,12 @@ geno_call <- function(data,filename,model.ploidy=4,sample.ploidy=4,min.posterior
     model.params <- lapply(1:m,function(i){model.params[ix[i],c(1,3,5,6,8,10,11,13,15)]})
   }
   
-  geno <- t(mapply(FUN=predict_NMM,x=data,params=model.params,ploidy=sample.ploidy,min.posterior=min.posterior,transform=transform))
+  geno <- mapply(FUN=predict_NMM,x=data,params=model.params,ploidy=sample.ploidy,min.posterior=min.posterior,transform=transform)
+  if (length(sample.id)==1) {
+    geno <- matrix(geno,ncol=1)
+  } else {
+    geno <- t(geno)
+  }
   colnames(geno) <- sample.id
   rownames(geno) <- snp.id
   return(geno)

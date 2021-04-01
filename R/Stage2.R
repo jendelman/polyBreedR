@@ -2,11 +2,12 @@
 #' 
 #' Stage 2 analysis of multi-environment trials 
 #' 
-#' Stage 2 of the two-stage approach described by Damesa et al. 2017, using ASReml-R for variance component estimation (license is required). The variable \code{data} must contain at least three columns: id, env, blue. id is the individual identifier, and env represents the environment at which Stage 1 analysis was performed. blue is the BLUE from Stage 1 (NAs are not allowed). Two other column names are reserved: trait and loc. The former triggers a multivariate, multi-trait analysis. The latter triggers the inclusion of a random genotype x location effect (to be completed). To model the uncertainty in the BLUEs from Stage 1 in Stage 2, an additional random effect is included with a variance-covariance matrix named Omega (following notation from Damesa et al. 2017). This variable must be defined globally instead of passing it to the function. The function \code{\link{Stage2_prep}} can be used to prepare both \code{data} and Omega. By default, the model includes independent random effects for genotype (id). Additional genetic effects with specific covariance structure (such as the G matrix for genomic breeding values) can be included using the argument \code{kernels}, which is a vector of variable names (for example, "G") defined in the global environment. (Do not use the name "I" for a kernel; it is reserved for the independent genetic effect.) All individuals in \code{data} must be present in the kernel matrices, but the kernels can contain individuals not in \code{data} to make predictions for unphenotyped individuals using \code{\link{predict_MME}}. All kernel matrices must have the same rownames attribute. For numerical stability when inverting the kernel matrices, a small positive number (1e-5) is added to the diagonal elements. By default, the workspace memory for ASReml-R is set at 500mb. If you get an error about insufficient memory, try increasing it. ASReml-R version 4.1.0.148 or later is required. For kernel matrix K, the variance reported in \code{vars} equal the variance component times the mean of the diagonal elements of ZKZ', which allows for easy computation of the proportion of variance.
+#' Stage 2 of the two-stage approach described by Damesa et al. 2017, using ASReml-R for variance component estimation (license is required). The variable \code{data} has two mandatory column names: id = individual (genotype identifier), and env = environment at which Stage 1 analysis was performed. The argument \code{traits} is a character vector that must match column names in \code{data}. Missing data are allowed in the multi-trait but not the single-trait analysis. For single-trait analysis, an additional random effect can be included to partition the residual and GxE effects. The variance-covariance matrix of this effect must be named Omega (following notation from Damesa et al. 2017) and defined globally in the workspace, rather than passing it to the function (this is due to limitations with ASReml-R). The function \code{\link{Stage2_prep}} can be used to prepare both \code{data} and Omega. By default, the model includes independent random effects for genotype (id). Additional genetic effects with specific covariance structure (such as the G matrix for genomic breeding values) can be included using the argument \code{kernels}, which is a vector of variable names (for example, "G") defined in the global environment. (Do not use the name "I" for a kernel; it is reserved for the independent genetic effect.) All individuals in \code{data} must be present in the kernel matrices, but the kernels can contain individuals not in \code{data} to make predictions for unphenotyped individuals using \code{\link{predict_MME}}. All kernel matrices must have the same rownames attribute. For numerical stability when inverting the kernel matrices, a small positive number (1e-5) is added to the diagonal elements. By default, the workspace memory for ASReml-R is set at 500mb. If you get an error about insufficient memory, try increasing it. ASReml-R version 4.1.0.148 or later is required. For kernel matrix K, the variance reported in \code{vars} equal the variance component times the mean of the diagonal elements of ZKZ', to facilitate proper calculation of the proportion of variance.
 #' 
 #' @references Damesa et al. 2017. Agronomy Journal 109: 845-857. doi:10.2134/agronj2016.07.0395
 #' 
 #' @param data data frame of BLUEs from Stage 1 (see Details)
+#' @param traits character vector of trait names, matching columns in \code{data}
 #' @param kernels vector of variable names for variance-covariance matrices of the genetic effects (see Details)
 #' @param silent TRUE/FALSE, whether to suppress ASReml-R output
 #' @param workspace Memory limit for ASRreml-R variance estimation
@@ -22,38 +23,36 @@
 #' @importFrom stats model.matrix
 #' @importFrom methods new
 #' @import Matrix
+#' @importFrom tidyr pivot_longer
 #' @export
 
-Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
+Stage2 <- function(data,traits,kernels=NULL,silent=TRUE,workspace="500mb") {
   
   stopifnot(requireNamespace("asreml"))
-  n.obs <- nrow(data)
-  if (!(exists("Omega")&&(inherits(Omega,"Matrix")|inherits(Omega,"matrix")))) {
-    warning("Omega covariance matrix is not defined")
-    skip.omega <- TRUE
-    random.effects <- ""
-  } else {
-    skip.omega <- FALSE
-    stopifnot(nrow(Omega)==n.obs)
-    random.effects <- "vm(units,source=Omega,singG='PSD')+"
-  }
-  stopifnot(all(c("id","blue","env") %in% colnames(data)))
-  stopifnot(!is.na(data$blue))
+  stopifnot(length(grep("trait",traits))==0)
+  stopifnot(all(c("id","env") %in% colnames(data)))
   
-  if ("trait" %in% colnames(data)) {
-    data$Trait <- factor(as.character(data$trait))
-    traits <- levels(data$Trait)
-    n.trait <- length(traits)
-    stopifnot(n.trait>1)
-    multi.trait <- TRUE
-    fixed.effects <- "env:Trait"
-    random.effects <- paste0(random.effects,"id(id):us(Trait)")
-    model <- "asreml(data=data,fixed=blue~F,random=~R,residual=~dsum(~id(units)|Trait)"
+  traits <- sort(traits)
+  n.trait <- length(traits)
+  if (n.trait > 1) {
+    fixed.effects <- "env:trait"
+    random.effects <- "id(id):us(trait)"
+    model <- sub("blue",paste(traits,collapse=","),
+                 "asreml(data=data,fixed=cbind(blue)~F,random=~R,residual=~id(units):us(trait)",fixed=T)
   } else {
-    multi.trait <- FALSE
+    stopifnot(!is.na(data[,traits]))
     fixed.effects <- "env"
-    random.effects <- paste0(random.effects,"id(id)")
-    model <- "asreml(data=data,fixed=blue~F,random=~R,residual=~idv(units)"
+    random.effects <- "id(id)"
+    model <- sub("blue",traits,"asreml(data=data,fixed=blue~F,random=~R,residual=~idv(units)",fixed=T)
+  }
+  
+  if (!(exists("Omega")&&(inherits(Omega,"Matrix")|inherits(Omega,"matrix"))) | (n.trait > 1)) {
+    skip.omega <- TRUE
+  } else {
+    cat("Omega matrix detected\n")
+    skip.omega <- FALSE
+    stopifnot(nrow(Omega)==nrow(data))
+    random.effects <- paste0(random.effects,"+vm(units,source=Omega,singG='PSD')")
   }
   
   data$env <- factor(as.character(data$env))
@@ -79,12 +78,12 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     for (i in 1:nK) {
       eval(parse(text=gsub("Q",kernels[i],"Q <- Q[id,id]")))
     }
-    if (multi.trait) {
-      random.effects <- sub("us(Trait)","idh(Trait)",random.effects,fixed=T)
-      random.effects <- paste0(random.effects,sub("Q",kernels[1],"+vm(id,source=Q,singG='PSD'):us(Trait)"))
+    if (n.trait > 1) {
+      random.effects <- sub("us(trait)","idh(trait)",random.effects,fixed=T)
+      random.effects <- paste0(random.effects,sub("Q",kernels[1],"+vm(id,source=Q,singG='PSD'):us(trait)"))
       if (nK > 1) {
         for (i in 2:nK) {
-          random.effects <- paste0(random.effects,sub("Q",kernels[i],"+vm(id,source=Q,singG='PSD'):idh(Trait)"))
+          random.effects <- paste0(random.effects,sub("Q",kernels[i],"+vm(id,source=Q,singG='PSD'):idh(trait)"))
         }
       }
     } else {
@@ -94,15 +93,7 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     }
   } 
   
-  if (multi.trait) {
-    Z <- Matrix(model.matrix(~id:Trait-1,data))
-    colnames(Z) <- sub("Trait","",colnames(Z),fixed=T)
-  } else {
-    Z <- Matrix(model.matrix(~id-1,data))
-  }
-  colnames(Z) <- sub("id","",colnames(Z),fixed=T)
-  
-  asreml.options(workspace=workspace,maxit=25,trace=!silent)
+  asreml.options(workspace=workspace,maxit=30,trace=!silent)
   model <- sub(pattern="F",replacement=fixed.effects,model)
   model <- sub(pattern="R",replacement=random.effects,model)
   if (!skip.omega) {
@@ -121,40 +112,51 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
   vc <- sans$varcomp
   vc <- vc[vc$bound!="F",c("component","std.error")]
   
-  if (multi.trait) {
-    vars <- f.id(vc,traits,keyword="!R")
-    Rmat <- Diagonal(n=n.obs,x=vars[match(as.character(data$trait),traits)])
-    if (!skip.omega) {
-      resid <- tapply(diag(Omega),data$Trait,mean)
-      vc.out <- rbind(GxE=vars,residual=resid[match(traits,names(resid))])
-    } else {
-      vc.out <- matrix(vars,nrow=1)
-      rownames(vc.out) <- "residual"
-    }
-    colnames(vc.out) <- traits
+  if (n.trait > 1) {
+    trait.cov <- f.cor(vc=vc[grep("units",rownames(vc),fixed=T),],traits)
+    Rmat <- kronecker(Diagonal(nrow(data)),trait.cov)
+    id.env <- paste(data$id,data$env,sep=":")
+    tmp <- expand.grid(traits,id.env)
+    Rnames <- apply(cbind(as.character(tmp$Var2),as.character(tmp$Var1)),1,paste,collapse=":")
+    
+    vars <- diag(trait.cov)
+    data2 <- data[,c("id","env",traits)]
+    data2 <- pivot_longer(data=data2,cols=match(traits,colnames(data2)),
+                          names_to="trait",values_to="blue")
+    data2$trait <- factor(data2$trait,levels=traits)
+    ix <- which(!is.na(data2$blue))
+    data2 <- as.data.frame(data2[ix,])
+    tmp <- apply(data2[,c("id","env","trait")],1,paste,collapse=":")
+    ix <- match(tmp,Rnames)
+    Rmat <- Rmat[ix,ix]
+  
+    Z <- Matrix(model.matrix(~id:trait-1,data2))
+    colnames(Z) <- sub("trait","",colnames(Z),fixed=T)
   } else {
     vars <- vc[match("units!units",rownames(vc)),1]
-    Rmat <- Diagonal(n.obs)*vars
-    if (!skip.omega) {
-      vc.out <- rbind(GxE=vars,residual=mean(diag(Omega)))
-    } else {
-      vc.out <- matrix(vars,nrow=1)
-      rownames(vc.out) <- "residual"
-    }
-    colnames(vc.out) <- c("estimate")
+    data2 <- data[,c("id","env",traits)]
+    colnames(data2) <- c("id","env","blue")
+    Rmat <- Diagonal(nrow(data2))*vars
+    Z <- Matrix(model.matrix(~id-1,data2))
   }
-  if (!skip.omega) {
-    Rmat <- Rmat + Matrix(Omega)
-  }
-  
-  K <- vector("list",nK+1)
-  names(K) <- c("I",kernels)
-  nZ <- ncol(Z)
+  colnames(Z) <- sub("id","",colnames(Z),fixed=T)
   n.id <- length(id)
   
-  if (!multi.trait) {
+  if (!skip.omega) {
+    vc.out <- rbind(GxE=vars,residual=mean(diag(Omega)))
+    Rmat <- Rmat + Matrix(Omega)
+  } else {
+    vc.out <- matrix(vars,nrow=1)
+    rownames(vc.out) <- "residual"
+  }
+  colnames(vc.out) <- traits
+
+  K <- vector("list",nK+1)
+  names(K) <- c("I",kernels)
+
+  if (n.trait==1) {
     vcnames <- rownames(vc)
-    K[[1]] <- vc["id",1]*Diagonal(n=nZ)
+    K[[1]] <- vc["id",1]*Diagonal(n.id)
     dimnames(K[[1]]) <- list(id,id)
     vars <- matrix(0,ncol=1,nrow=nK+1)
     rownames(vars) <- paste0("kernel=",c("I",kernels))[(nK+1):1]
@@ -168,17 +170,17 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     }
     vc.out <- rbind(vars,vc.out)
   } else {
-    trait.cov <- f.cor(vc,traits)
     tmp <- expand.grid(traits,id)
     Knames <- apply(cbind(as.character(tmp$Var2),as.character(tmp$Var1)),1,paste,collapse=":")
     iz <- match(colnames(Z),Knames)
     
     #kernel = I
     if (nK==0) {
+      trait.cov <- f.cor(vc=vc[grep("id:trait",rownames(vc),fixed=T),],traits)
       KK <- kronecker(Diagonal(n.id),trait.cov)
       vc.out <- rbind(diag(trait.cov),vc.out)
     } else {
-      vars <- f.id(vc=vc,traits=traits,keyword="id:Trait")
+      vars <- f.id(vc=vc,traits=traits,keyword="id:trait")
       KK <- kronecker(Diagonal(n.id),Diagonal(n=n.trait,x=vars))
       vc.out <- rbind(vars,vc.out)
     }
@@ -187,11 +189,12 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
     rownames(vc.out) <- replace(rownames(vc.out),1,"kernel=I")
     
     if (nK > 0) {
+      trait.cov <- f.cor(vc=vc[grep("):trait",rownames(vc),fixed=T),],traits)
       KK <- eval(parse(text=sub("Q",kernels[1],"Matrix(kronecker(Q,trait.cov))")))
       dimnames(KK) <- list(Knames,Knames)
       K[[2]] <- KK[iz,iz]
       tmp <- eval(parse(text=sub("Q","K[[2]]","diag(Z%*%Q%*%t(Z))")))
-      vars <- tapply(tmp,data$Trait,mean)
+      vars <- tapply(tmp,data2$trait,mean)
       vc.out <- rbind(vars,vc.out)
       rownames(vc.out) <- replace(rownames(vc.out),1,paste0("kernel=",kernels[1]))
     }
@@ -203,18 +206,17 @@ Stage2 <- function(data,kernels=NULL,silent=TRUE,workspace="500mb") {
         dimnames(KK) <- list(Knames,Knames)
         K[[i+1]] <- KK[iz,iz]
         tmp <- eval(parse(text=sub("Q","K[[i+1]]","diag(Z%*%Q%*%t(Z))")))
-        vars <- tapply(tmp,data$Trait,mean)
+        vars <- tapply(tmp,data2$trait,mean)
         vc.out <- rbind(vars,vc.out)
         rownames(vc.out) <- replace(rownames(vc.out),1,paste0("kernel=",kernels[i]))
       }
     }
   }
   
-  if (!multi.trait) {
-    out <- new(Class="MME",data=data,kernels=K,Rmat=Rmat)
+  out <- new(Class="MME",data=data2,kernels=K,Rmat=Rmat)
+  if (n.trait==1) {
     return(list(aic=round(as.numeric(sans$aic),1),vars=vc.out,MME=out))
   } else {
-    out <- new(Class="MME",data=data[,-match("Trait",colnames(data))],kernels=K,Rmat=Rmat)
     return(list(aic=round(as.numeric(sans$aic),1),vars=vc.out,trait.cov=trait.cov,MME=out))
   }
 }

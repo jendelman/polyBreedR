@@ -7,8 +7,8 @@
 geno_call(
   data,
   filename,
-  model.ploidy = 4,
-  sample.ploidy = 4,
+  model.ploidy = 4L,
+  sample.ploidy = 4L,
   min.posterior = 0,
   transform = TRUE
 )

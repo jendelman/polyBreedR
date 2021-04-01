@@ -1,10 +1,11 @@
-#' Prepare data for Stage 2 analysis of multi-environment trials
+#' Prepare data for single-trait, Stage 2 analysis of multi-environment trials
 #' 
-#' Prepare data for Stage 2 analysis of multi-environment trials
+#' Prepare data for single-trait, Stage 2 analysis of multi-environment trials
 #' 
-#' Designed to prepare data files for \code{\link{Stage2}} based on output from \code{\link{Stage1}}. Each element of \code{blue.vcov} is a matrix for one trait, with the first column containing BLUEs and the remainder is their variance-covariance. The rownames are the id and env concatenated with ":". The output \code{blue} is a data frame with id, env, and trait (when multiple traits are provided). This allows for multi-trait analysis in Stage 2. 
+#' Designed to prepare data for \code{\link{Stage2}} based on output from \code{\link{Stage1}}. The first column of \code{blue.vcov} contains BLUEs, and the remainder is their variance-covariance. The rownames are the id and env concatenated with ":". 
 #' 
-#' @param blue.vcov named list of blue.vcov matrices from Stage 1 
+#' @param blue.vcov blue.vcov matrix from Stage 1 
+#' @param trait trait name (used to name column in output)
 #' @param exclude.id vector of individuals to exclude
 #' @param exclude.env vector of envs to exclude
 #' 
@@ -16,31 +17,20 @@
 #' 
 #' @export
 
-Stage2_prep <- function(blue.vcov,exclude.id=character(0),exclude.env=character(0)) {
+Stage2_prep <- function(blue.vcov,trait,
+                        exclude.id=character(0),exclude.env=character(0)) {
   
-  traits <- names(blue.vcov)
-  n.trait <- length(blue.vcov)
-  vcov <- vector("list",n.trait)
-  blue <- NULL
-  for (i in 1:n.trait) {
-    tmp <- blue.vcov[[i]]
-    tmp2 <- strsplit(rownames(tmp),split=":",fixed=T)
-    id.i <- sapply(tmp2,"[",1)
-    env.i <- sapply(tmp2,"[",2)
-    ix <- which(!(id.i %in% exclude.id) & !(env.i %in% exclude.env))
-    
-    blue <- rbind(blue,data.frame(id=id.i[ix],env=env.i[ix],trait=traits[i],blue=as.numeric(tmp[ix,1])))
-    vcov[[i]] <- tmp[ix,1+ix]
-  }
-  
-  Omega <- direct_sum(vcov)
+  blue.vcov <- unlist(blue.vcov)
+  tmp <- strsplit(rownames(blue.vcov),split=":",fixed=T)
+  id.i <- sapply(tmp,"[",1)
+  env.i <- sapply(tmp,"[",2)
+  ix <- which(!(id.i %in% exclude.id) & !(env.i %in% exclude.env))
+  blue <- data.frame(id=id.i[ix],env=env.i[ix],blue=as.numeric(blue.vcov[ix,1]))
+  colnames(blue) <- c("id","env",trait)
+  Omega <- blue.vcov[ix,1+ix]
   attr(Omega,"INVERSE") <- FALSE
-  rownames(Omega) <- colnames(Omega) <- 1:nrow(blue)
-  #blue$id <- factor(blue$id)
-  #blue$env <- factor(blue$env)
-  #blue$trait <- factor(blue$trait)
-  if (n.trait==1) {
-    blue <- blue[,-match("trait",colnames(blue))] 
-  }
+  rownames(Omega) <- colnames(Omega) <- 1:nrow(Omega)
   return(list(blue=blue,Omega=Omega))
+  
 }
+
