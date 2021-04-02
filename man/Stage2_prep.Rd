@@ -4,17 +4,10 @@
 \alias{Stage2_prep}
 \title{Prepare data for single-trait, Stage 2 analysis of multi-environment trials}
 \usage{
-Stage2_prep(
-  blue.vcov,
-  trait,
-  exclude.id = character(0),
-  exclude.env = character(0)
-)
+Stage2_prep(blue.vcov, exclude.id = character(0), exclude.env = character(0))
 }
 \arguments{
-\item{blue.vcov}{blue.vcov matrix from Stage 1}
-
-\item{trait}{trait name (used to name column in output)}
+\item{blue.vcov}{named list containing the blue.vcov matrix from Stage 1}
 
 \item{exclude.id}{vector of individuals to exclude}
 
@@ -31,5 +24,5 @@ a list containing
 Prepare data for single-trait, Stage 2 analysis of multi-environment trials
 }
 \details{
-Designed to prepare data for \code{\link{Stage2}} based on output from \code{\link{Stage1}}. The first column of \code{blue.vcov} contains BLUEs, and the remainder is their variance-covariance. The rownames are the id and env concatenated with ":".
+Designed to prepare data for \code{\link{Stage2}} based on output from \code{\link{Stage1}}. The argument \code{blue.vcov} is a named list with one element: a matrix containing the BLUEs in column 1 and their variance-covariance in the remaining columns. The rownames are the id and env concatenated with ":".
 }

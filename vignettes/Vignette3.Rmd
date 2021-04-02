@@ -112,13 +112,13 @@ ggplot(plot.data,aes(x=Var2,y=value,colour=Var1)) + geom_point() + xlab("") +
 
 The above figure shows the distribution of plot-based $H^2$ for the 6 enviroments. 
 
-Clones without marker data need to be removed from the Stage 1 results before continuing to Stage 2, which is one of the features of `Stage2_prep`. This function also returns a matrix called Omega, which must be saved as a variable in the global environment for ASReml-R to work properly in `Stage2`. The same is true for the G matrix (created above) and other covariance matrices, which are called "kernels" in `Stage2`. The `Stage2` function automatically includes a random genetic effect with an identity (I) variance-covariance matrix, which represents non-additive effects when used in combination with a random effect with covariance proportional to G. At present, each trait must be analyzed separately in Stage 2, but a multivariate analysis to estimate the genetic correlation between traits is under development. Let's analyze total yield.
+Clones without marker data need to be removed from the Stage 1 results before continuing to Stage 2, which is one of the features of `Stage2_prep`. This function also returns a matrix called Omega, which must be saved as a variable in the global environment for ASReml-R to work properly in `Stage2`. The same is true for the G matrix (created above) and other covariance matrices, which are called "kernels" in `Stage2`. The `Stage2` function automatically includes a random genetic effect with an identity (I) variance-covariance matrix, which represents non-additive effects when used in combination with a random effect with covariance proportional to G. At present, each trait must be analyzed separately in Stage 2, but a multivariate analysis to estimate the genetic correlation between traits is under development. Here is the code to analyze total yield:
 ```{r}
 not.genotyped <- setdiff(ans1$blue$id,rownames(G))
 ans1b <- Stage2_prep(ans1$blue.vcov["total.yield"],exclude.id=not.genotyped)
 Omega <- ans1b$Omega
 blue <- ans1b$blue
-ans2 <- Stage2(data=blue,kernels="G",silent=F)
+ans2 <- Stage2(data=blue,traits="total.yield",kernels="G",silent=F)
 round(ans2$vars,1)
 ```
 
@@ -134,7 +134,7 @@ The `Stage1` function requires partial replication within each environment to es
 
 ```{r}
 remove("Omega") #remove variable from the global environment
-ans2b <- Stage2(data=blue,kernels="G",silent=T)
+ans2b <- Stage2(data=blue,traits="total.yield",kernels="G",silent=T)
 
 #Model with Omega has lower AIC:
 ans2$aic - ans2b$aic
@@ -203,7 +203,7 @@ To estimate accuracy by cross-validation, the correlation between the predicted 
 
 ```{r}
 #Predictive ability
-pred.ability <- cor(blue$blue[match(W17,blue$id)],add.pred.W17$blup[match(W17,add.pred.W17$id)])
+pred.ability <- cor(blue$total.yield[match(W17,blue$id)],add.pred.W17$blup[match(W17,add.pred.W17$id)])
 
 #Prediction accuracy by cross-validation
 pred.ability/sqrt(0.31)
