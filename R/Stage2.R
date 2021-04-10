@@ -38,12 +38,12 @@ Stage2 <- function(data,traits,kernels=NULL,silent=TRUE,workspace="500mb") {
     fixed.effects <- "env:trait"
     random.effects <- "id(id):us(trait)"
     model <- sub("blue",paste(traits,collapse=","),
-                 "asreml(data=data,fixed=cbind(blue)~F,random=~R,residual=~id(units):us(trait)",fixed=T)
+                 "asreml(data=data,fixed=cbind(blue)~FIXED,random=~RANDOM,residual=~id(units):us(trait)",fixed=T)
   } else {
     stopifnot(!is.na(data[,traits]))
     fixed.effects <- "env"
     random.effects <- "id(id)"
-    model <- sub("blue",traits,"asreml(data=data,fixed=blue~F,random=~R,residual=~idv(units)",fixed=T)
+    model <- sub("blue",traits,"asreml(data=data,fixed=blue~FIXED,random=~RANDOM,residual=~idv(units)",fixed=T)
   }
   
   if (!(exists("Omega")&&(inherits(Omega,"Matrix")|inherits(Omega,"matrix"))) | (n.trait > 1)) {
@@ -94,8 +94,8 @@ Stage2 <- function(data,traits,kernels=NULL,silent=TRUE,workspace="500mb") {
   } 
   
   asreml.options(workspace=workspace,maxit=30,trace=!silent)
-  model <- sub(pattern="F",replacement=fixed.effects,model)
-  model <- sub(pattern="R",replacement=random.effects,model)
+  model <- sub(pattern="FIXED",replacement=fixed.effects,model,fixed=T)
+  model <- sub(pattern="RANDOM",replacement=random.effects,model,fixed=T)
   if (!skip.omega) {
     start.table <- eval(parse(text=paste0(model,",start.values = TRUE)")))$vparameters.table
     k <- grep("Omega",start.table$Component,fixed=T)

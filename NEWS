@@ -1,3 +1,6 @@
+Changes in 0.24
+* Fixed naming conflict in Stage2
+
 Changes in 0.23
 * Changes to multi-trait functionality
 
