@@ -15,7 +15,7 @@
 #' 
 #' @return List containing
 #' \describe{
-#' \item{H2}{matrix of broad-sense heritability for each env x trait combination}
+#' \item{H2}{matrix of broad-sense heritability on a plot basis, for each env x trait combination}
 #' \item{blue}{data frame of BLUEs for id x traits}
 #' \item{blue.vcov}{list of BLUE + variance-covariance matrices (one matrix per trait)}
 #' }
@@ -47,8 +47,8 @@ Stage1 <- function(data,traits,effects=NULL,silent=TRUE,workspace="500mb",pworks
   rownames(H2) <- envs
   
   #prepare asreml command
-  asreml.options(workspace=workspace,pworkspace=pworkspace,maxit=30,trace=!silent)
-  model1 <- "asreml(data=data1,na.action=na.method(y='omit',x='omit'),fixed=yyy~F"
+  asreml::asreml.options(workspace=workspace,pworkspace=pworkspace,maxit=30,trace=!silent)
+  model1 <- "asreml::asreml(data=data1,na.action=asreml::na.method(y='omit',x='omit'),fixed=yyy~F"
   model2 <- "random=~R,residual=~idv(units))"
   
   if (!is.null(effects)) {
@@ -125,7 +125,7 @@ Stage1 <- function(data,traits,effects=NULL,silent=TRUE,workspace="500mb",pworks
         Ve <- vc[match("units!units",rownames(vc)),1]
         H2[j,i] <- round(Vg/(Vg+Ve),2)
   
-        predans <- predict.asreml(blue.ans,classify="id",vcov = TRUE)
+        predans <- asreml::predict.asreml(blue.ans,classify="id",vcov = TRUE)
         vcov[[j]] <- predans$vcov
         tmp <- data.frame(id=as.character(predans$pvals$id),env=envs[j],
                           blue=predans$pvals$predicted.value)

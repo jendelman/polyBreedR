@@ -38,7 +38,7 @@ Stage2 <- function(data,traits,kernels=NULL,silent=TRUE,workspace="500mb") {
     fixed.effects <- "env:trait"
     random.effects <- "id(id):us(trait)"
     model <- sub("blue",paste(traits,collapse=","),
-                 "asreml(data=data,fixed=cbind(blue)~FIXED,random=~RANDOM,residual=~id(units):us(trait)",fixed=T)
+                 "asreml::asreml(data=data,fixed=cbind(blue)~FIXED,random=~RANDOM,residual=~id(units):us(trait)",fixed=T)
   } else {
     stopifnot(!is.na(data[,traits]))
     fixed.effects <- "env"
@@ -93,7 +93,7 @@ Stage2 <- function(data,traits,kernels=NULL,silent=TRUE,workspace="500mb") {
     }
   } 
   
-  asreml.options(workspace=workspace,maxit=30,trace=!silent)
+  asreml::asreml.options(workspace=workspace,maxit=30,trace=!silent)
   model <- sub(pattern="FIXED",replacement=fixed.effects,model,fixed=T)
   model <- sub(pattern="RANDOM",replacement=random.effects,model,fixed=T)
   if (!skip.omega) {
