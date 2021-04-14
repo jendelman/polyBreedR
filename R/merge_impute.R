@@ -33,7 +33,10 @@ merge_impute <- function(geno1,geno2,ploidy) {
     b1 <- (ploidy-mu)/max(x)
     b2 <- (0-mu)/min(x)
     b <- min(c(1,b1,b2))
-    return(mu+b*x[-1])
+    y <- mu+b*x[-1]
+    y <- ifelse(y<0,0,y)
+    y <- ifelse(y>ploidy,ploidy,y)
+    return(y)
   }
   
   id1 <- colnames(geno1)
