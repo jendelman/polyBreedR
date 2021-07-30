@@ -15,6 +15,7 @@
 #'
 #' @importFrom tidyr pivot_longer
 #' @import ggplot2
+#' @importFrom rlang .data
 #' @export
 #' 
 check_ploidy <- function(geno,map) {
@@ -34,6 +35,6 @@ check_ploidy <- function(geno,map) {
   plotme$Chrom <- factor(plotme$Chrom)
   v <- apply(ans,1,sum)
   plotme$id <- factor(plotme$id,levels=rownames(ans)[order(v)],ordered=T)
-  p <- ggplot(data=plotme,aes(x=id,y=y,fill=Chrom)) + geom_col() + scale_fill_brewer(palette="Set3") + theme_bw() + theme(axis.title.x = element_blank(),axis.text.x = element_text(angle = 90,vjust = 0.5,hjust=1)) + ylab("Proportion of Markers with Dosage 1 or 3")
+  p <- ggplot(data=plotme,aes(x=.data$id,y=.data$y,fill=.data$Chrom)) + geom_col() + scale_fill_brewer(palette="Set3") + theme_bw() + theme(axis.title.x = element_blank(),axis.text.x = element_text(angle = 90,vjust = 0.5,hjust=1)) + ylab("Proportion of Markers with Dosage 1 or 3")
   return(list(mat=ans,plot=p))
 }

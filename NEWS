@@ -1,3 +1,6 @@
+Changes in 0.25
+* Moved functions for stage-wise analysis to R package StageWise
+
 Changes in 0.24
 * Fixed naming conflict in Stage2
 

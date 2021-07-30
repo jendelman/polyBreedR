@@ -16,6 +16,7 @@
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom grDevices dev.off pdf
+#' @importFrom rlang .data
 #' @export
 GvsA <- function(parentage,G,A,filename=NULL,thresh.G=Inf,thresh.A=0.5,Gmax=NULL,Amax=NULL) {
   
@@ -49,7 +50,7 @@ GvsA <- function(parentage,G,A,filename=NULL,thresh.G=Inf,thresh.A=0.5,Gmax=NULL
     plotme <- data.frame(id=others[-z],x=A[j,others][-z],y=G[k,others][-z],stringsAsFactors = F)
     plotme$id <- ifelse(plotme$x >= thresh.A | plotme$y >= thresh.G,plotme$id,"")
     ttl <- paste(id[i],paste(as.character(parentage[i,2]),as.character(parentage[i,3]),sep=" / "),sep=" = ")
-    p <- ggplot(data=plotme,aes(x=x,y=y)) + geom_point() + geom_text_repel(aes(label=id),show.legend=FALSE,segment.color="red",colour="red") + theme_bw() + ggtitle(ttl) + xlab("A") + ylab("G") + xlim(c(0,Amax)) + ylim(c(Gmin,Gmax))
+    p <- ggplot(data=plotme,aes(x=.data$x,y=.data$y)) + geom_point() + geom_text_repel(aes(label=id),show.legend=FALSE,segment.color="red",colour="red") + theme_bw() + ggtitle(ttl) + xlab("A") + ylab("G") + xlim(c(0,Amax)) + ylim(c(Gmin,Gmax))
     if (!is.null(filename)){print(p)}
   }
   if (!is.null(filename)) {
