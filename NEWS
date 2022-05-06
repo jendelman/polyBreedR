@@ -1,3 +1,9 @@
+Changes in 0.26
+* Added dart_tag function
+* updated potato_V3array_map.csv with REF column for dart_tag
+* fixed readXY bug due to changes in tidyr
+* fixed slight bug in merge_impute
+
 Changes in 0.25
 * Moved functions for stage-wise analysis to R package StageWise
 

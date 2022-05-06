@@ -2,19 +2,44 @@
 % Please edit documentation in R/dart_tag.R
 \name{dart_tag}
 \alias{dart_tag}
-\title{Extract Ref/Alt counts from DArTag data file}
+\title{Process DArTag data}
 \usage{
-dart_tag(filename)
+dart_tag(
+  filename,
+  first.data.row = 9,
+  first.data.col = 6,
+  ploidy,
+  geno.call = TRUE,
+  n.core = 1
+)
 }
 \arguments{
 \item{filename}{input filename}
+
+\item{first.data.row}{first data row}
+
+\item{first.data.col}{first data column}
+
+\item{ploidy}{ploidy}
+
+\item{geno.call}{TRUE/FALSE}
+
+\item{n.core}{number of cores}
 }
 \value{
-3D array of allele counts with dimensions: markers, samples, alleles (ref/alt)
+Data frame with marker statistics and 5 matrices with dimensions markers x indiv
+\describe{
+\item{stats}{data frame with 10th percentile of depth and posterior prob for each marker}
+\item{depth}{(Alt+Ref) read count}
+\item{ratio}{Alt/(Alt+Ref)}
+\item{geno.mode}{Posterior mode for Alt allele dosage}
+\item{prob}{Maximum posterior probability}
+\item{geno.mean}{Posterior mean for Alt allele dosage}
+}
 }
 \description{
-Extract Ref/Alt counts from DArTag data file
+Process DArTag data
 }
 \details{
-Designed for standard two-row format from DArT. First 11 rows contain sample information. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded.
+Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. Genotype calls are made using the updog package (Gerard et al. 2018). If a sample has no reads at a marker, the genotype is NA and posterior probability equals 0.
 }

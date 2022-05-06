@@ -114,9 +114,11 @@ merge_impute <- function(geno1,geno2,ploidy) {
                     mu2=apply(W.L[id1,],1,mean))
     marker.means <- apply(geno2[mark2_1,],1,mean,na.rm=T)
     ans2_1 <- apply(rbind(marker.means,ans2_1),2,f1,ploidy=ploidy)
+    geno1 <- rbind(geno1,t(ans2_1))
   }
-  geno1a <- rbind(geno1,t(ans2_1))
-  geno2a <- rbind(geno2,t(ans1_2))
-  geno <- cbind(geno1a,geno2a[rownames(geno1a),])
+  if (m1_2 > 0) {
+    geno2 <- rbind(geno2,t(ans1_2))
+  }
+  geno <- cbind(geno1,geno2[rownames(geno1),])
   return(impute(geno,method="mean"))
 }
