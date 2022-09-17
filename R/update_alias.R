@@ -7,11 +7,17 @@
 #' @param x Vector of names to update
 #' @param alias Data frame with two columns: first is the preferred name and second is the alias
 #' @param remove.space TRUE/FALSE
+#' @param filename update names in file (variable "id")
 #' 
 #' @return Vector with updated names
 #' 
 #' @export
-update_alias <- function(x,alias,remove.space=TRUE) {
+update_alias <- function(x,alias,remove.space=TRUE,filename=NULL) {
+  if (!is.null(filename)) {
+    z <- read.csv(filename,check.names=F)
+    stopifnot("id" %in% colnames(z))
+    x <- z$id
+  }
   if (remove.space) {
     x <- gsub(pattern=" ",replacement = "",x=x,fixed=T)
   }
@@ -19,5 +25,12 @@ update_alias <- function(x,alias,remove.space=TRUE) {
   if (length(ix) > 0) {
     x[ix] <- alias[match(x[ix],alias[,2]),1]
   }
-  return(x)
+  if (!is.null(filename)) {
+    ix <- which(x!=z$id)
+    z$id <- x
+    write.csv(z,file=filename,row.names=F)
+    return(z[ix,])
+  } else {
+    return(x)
+  }
 }

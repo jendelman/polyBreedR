@@ -10,11 +10,12 @@ dart_tag(
   first.data.col = 6,
   ploidy,
   geno.call = TRUE,
-  n.core = 1
+  n.core = 1,
+  AB.file = NULL
 )
 }
 \arguments{
-\item{filename}{input filename}
+\item{filename}{DArTag CSV filename}
 
 \item{first.data.row}{first data row}
 
@@ -25,6 +26,8 @@ dart_tag(
 \item{geno.call}{TRUE/FALSE}
 
 \item{n.core}{number of cores}
+
+\item{AB.file}{CSV file to convert to array dosage (allele B)}
 }
 \value{
 Data frame with marker statistics and 5 matrices with dimensions markers x indiv
@@ -32,9 +35,9 @@ Data frame with marker statistics and 5 matrices with dimensions markers x indiv
 \item{stats}{data frame with 10th percentile of depth and posterior prob for each marker}
 \item{depth}{(Alt+Ref) read count}
 \item{ratio}{Alt/(Alt+Ref)}
-\item{geno.mode}{Posterior mode for Alt allele dosage}
+\item{geno.mode}{Posterior mode for allele dosage}
 \item{prob}{Maximum posterior probability}
-\item{geno.mean}{Posterior mean for Alt allele dosage}
+\item{geno.mean}{Posterior mean for allele dosage}
 }
 }
 \description{
@@ -42,4 +45,6 @@ Process DArTag data
 }
 \details{
 Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. Genotype calls are made using the updog package (Gerard et al. 2018). If a sample has no reads at a marker, the genotype is NA and posterior probability equals 0.
+
+Standard output for genotype calls is dosage of Alt allele. Optionally, specify \code{AB.file} to output dosage of B allele from SNP array. The file must have columns named "marker" and "REF", where REF is either A or B. Only markers present in AB.file will be in the output.
 }

@@ -4,21 +4,24 @@
 #' 
 #' Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. Genotype calls are made using the updog package (Gerard et al. 2018). If a sample has no reads at a marker, the genotype is NA and posterior probability equals 0.
 #' 
-#' @param filename input filename
+#' Standard output for genotype calls is dosage of Alt allele. Optionally, specify \code{AB.file} to output dosage of B allele from SNP array. The file must have columns named "marker" and "REF", where REF is either A or B. Only markers present in AB.file will be in the output.
+#' 
+#' @param filename DArTag CSV filename
 #' @param first.data.row first data row
 #' @param first.data.col first data column
 #' @param ploidy ploidy
 #' @param geno.call TRUE/FALSE
 #' @param n.core number of cores
+#' @param AB.file CSV file to convert to array dosage (allele B)
 #' 
 #' @return Data frame with marker statistics and 5 matrices with dimensions markers x indiv
 #' \describe{
 #' \item{stats}{data frame with 10th percentile of depth and posterior prob for each marker}
 #' \item{depth}{(Alt+Ref) read count}
 #' \item{ratio}{Alt/(Alt+Ref)}
-#' \item{geno.mode}{Posterior mode for Alt allele dosage}
+#' \item{geno.mode}{Posterior mode for allele dosage}
 #' \item{prob}{Maximum posterior probability}
-#' \item{geno.mean}{Posterior mean for Alt allele dosage}
+#' \item{geno.mean}{Posterior mean for allele dosage}
 #' }
 #' 
 #' @export
@@ -28,7 +31,7 @@
 #' @importFrom stats quantile
 
 dart_tag <- function(filename,first.data.row=9,first.data.col=6,ploidy,
-                     geno.call=TRUE,n.core=1) {
+                     geno.call=TRUE,n.core=1,AB.file=NULL) {
   
   data <- read.csv(filename,header=F,check.names=F)
   data2 <- as.matrix(data[first.data.row:nrow(data),first.data.col:ncol(data)])
@@ -48,6 +51,20 @@ dart_tag <- function(filename,first.data.row=9,first.data.col=6,ploidy,
   n <- ncol(ans1)
   ref <- ans1[1:m,]
   alt <- ans1[m+1:m,]
+  
+  if (!is.null(AB.file)) {
+    AB <- read.csv(AB.file)
+    mark <- intersect(AB$marker,rownames(ref))
+    m <- length(mark)
+    stopifnot(m > 1)
+    ref <- ref[mark,]
+    alt <- alt[mark,]
+    AB <- AB[match(mark,AB$marker),]
+    ib <- AB$marker[AB$REF=="B"]
+    tmp <- alt[ib,]
+    alt[ib,] <- ref[ib,]
+    ref[ib,] <- tmp
+  }
   
   f1 <- function(x,n,ploidy) {
     tmp <- try(flexdog(refvec=x[1:n],sizevec=x[n+1:n],ploidy=ploidy,model="norm",
@@ -90,6 +107,7 @@ dart_tag <- function(filename,first.data.row=9,first.data.col=6,ploidy,
                         depth0.1=apply(out$depth,1,quantile,p=0.1))
     rownames(stats) <- NULL
   }
+  
   return(c(list(stats=stats),out))
 }
 

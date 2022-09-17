@@ -1,3 +1,7 @@
+Changes in 0.27
+* dart_tag function has option to output B allele dosage
+* update_alias can be used to update file
+
 Changes in 0.26
 * Added dart_tag function
 * updated potato_V3array_map.csv with REF column for dart_tag

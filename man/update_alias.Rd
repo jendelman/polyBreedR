@@ -4,7 +4,7 @@
 \alias{update_alias}
 \title{Update names based on alias}
 \usage{
-update_alias(x, alias, remove.space = TRUE)
+update_alias(x, alias, remove.space = TRUE, filename = NULL)
 }
 \arguments{
 \item{x}{Vector of names to update}
@@ -12,6 +12,8 @@ update_alias(x, alias, remove.space = TRUE)
 \item{alias}{Data frame with two columns: first is the preferred name and second is the alias}
 
 \item{remove.space}{TRUE/FALSE}
+
+\item{filename}{update names in file (variable "id")}
 }
 \value{
 Vector with updated names
