@@ -1,3 +1,6 @@
+Changes in 0.28
+* new function array2VCF for storing SNP array data in VCF
+
 Changes in 0.27
 * dart_tag function has option to output B allele dosage
 * update_alias can be used to update file

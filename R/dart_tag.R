@@ -1,39 +1,29 @@
-#' Process DArTag data
+#' Convert DArTag file to read count file 
 #' 
-#' Process DArTag data
+#' Convert DArTag file to read count file 
 #' 
-#' Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. Genotype calls are made using the updog package (Gerard et al. 2018). If a sample has no reads at a marker, the genotype is NA and posterior probability equals 0.
+#' Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. 
 #' 
-#' Standard output for genotype calls is dosage of Alt allele. Optionally, specify \code{AB.file} to output dosage of B allele from SNP array. The file must have columns named "marker" and "REF", where REF is either A or B. Only markers present in AB.file will be in the output.
+#' Output format contains the read counts for each marker x id combination in the format "count1|count2" (which is the input format for PolyOrigin).
 #' 
-#' @param filename DArTag CSV filename
-#' @param first.data.row first data row
-#' @param first.data.col first data column
-#' @param ploidy ploidy
-#' @param geno.call TRUE/FALSE
-#' @param n.core number of cores
-#' @param AB.file CSV file to convert to array dosage (allele B)
+#' Use \code{AB.file} to convert REF/ALT counts from dart.file to A/B counts from SNP array. The file must have columns named "marker" and "REF", where REF is either A or B. Only markers present in AB.file will be in the output.
 #' 
-#' @return Data frame with marker statistics and 5 matrices with dimensions markers x indiv
-#' \describe{
-#' \item{stats}{data frame with 10th percentile of depth and posterior prob for each marker}
-#' \item{depth}{(Alt+Ref) read count}
-#' \item{ratio}{Alt/(Alt+Ref)}
-#' \item{geno.mode}{Posterior mode for allele dosage}
-#' \item{prob}{Maximum posterior probability}
-#' \item{geno.mean}{Posterior mean for allele dosage}
-#' }
+#' @param dart.file DArTag CSV filename
+#' @param first.data.row first data row in dart.file
+#' @param first.data.col first data column in dart.file
+#' @param out.file name of output file
+#' @param map.file optional CSV file (marker, chrom, position) to integrate into the output
+#' @param AB.file optional CSV file (marker, REF) to convert to allele B dosage
+#' 
+#' @return marker x indiv matrix of read depths
 #' 
 #' @export
 #' @importFrom utils read.csv
-#' @importFrom updog flexdog
-#' @importFrom parallel makeCluster clusterExport parLapply stopCluster
-#' @importFrom stats quantile
 
-dart_tag <- function(filename,first.data.row=9,first.data.col=6,ploidy,
-                     geno.call=TRUE,n.core=1,AB.file=NULL) {
+dart_tag <- function(dart.file,first.data.row=9,first.data.col=6,
+                     out.file,map.file=NULL,AB.file=NULL) {
   
-  data <- read.csv(filename,header=F,check.names=F)
+  data <- read.csv(dart.file,header=F,check.names=F)
   data2 <- as.matrix(data[first.data.row:nrow(data),first.data.col:ncol(data)])
   data2 <- apply(data2,2,as.integer)
   id <- as.character(data[first.data.row-2,first.data.col:ncol(data)])
@@ -54,6 +44,7 @@ dart_tag <- function(filename,first.data.row=9,first.data.col=6,ploidy,
   
   if (!is.null(AB.file)) {
     AB <- read.csv(AB.file)
+    AB <- AB[AB$REF %in% c("A","B"),]
     mark <- intersect(AB$marker,rownames(ref))
     m <- length(mark)
     stopifnot(m > 1)
@@ -66,49 +57,21 @@ dart_tag <- function(filename,first.data.row=9,first.data.col=6,ploidy,
     ref[ib,] <- tmp
   }
   
-  f1 <- function(x,n,ploidy) {
-    tmp <- try(flexdog(refvec=x[1:n],sizevec=x[n+1:n],ploidy=ploidy,model="norm",
-                   verbose=FALSE),silent=TRUE)
-    if (inherits(tmp,"try-error")) {
-      return(c(NA*numeric(2*n),rep(0,n)))
-    } 
-    ix <- which(x[n+1:n]==0)
-    if (length(ix) > 0) {
-      tmp$geno[ix] <- NA
-      tmp$postmean[ix] <- NA
-      tmp$maxpostprob[ix] <- 0
-    }
-    return(c(tmp$geno,tmp$postmean,tmp$maxpostprob))
-  }
+  ans2 <- apply(rbind(ref,alt),2,
+                  FUN=function(u){v <- split(u,f=rep(1:m,times=2))
+                  sapply(v,paste,collapse="|")})
+  rownames(ans2) <- rownames(alt)
   
-  out <- list(depth=ref+alt,ratio=alt/(ref+alt))
-              
-  if (geno.call) {
-    tmp <- split(cbind(alt,ref+alt),f=1:m)
-  
-    if (n.core==1) {
-      ans <- lapply(tmp,f1,n=n,ploidy=ploidy)
-    } else {
-      cl <- makeCluster(n.core)
-      clusterExport(cl=cl,varlist=NULL)
-      ans <- parLapply(cl=cl,X=tmp,f1,n=n,ploidy=ploidy)
-      stopCluster(cl)
-    }
-    ans <- matrix(unlist(ans),nrow=m,ncol=3*n,byrow = T)
-    dimnames(ans) <- list(rownames(alt),rep(colnames(alt),times=3))
-    out <- c(out,list(geno.mode=ans[,1:n],
-                      prob=ans[,2*n+1:n],geno.mean=ans[,n+1:n]))
-    stats <- data.frame(marker=rownames(alt),
-                        depth0.1=apply(out$depth,1,quantile,p=0.1),
-                        prob0.1=apply(out$prob,1,quantile,p=0.1))
-    rownames(stats) <- NULL
+  if (!is.null(map.file)) {
+    map <- read.csv(map.file)
+    colnames(map)[1:3] <- c("marker","chrom","position")
+    marks <- intersect(map$marker,rownames(ans2))
+    map2 <- map[map$marker %in% marks,1:3]
+    write.csv(cbind(map2,ans2[map2$marker,]), file=out.file, row.names=F)
   } else {
-    stats <- data.frame(marker=rownames(alt),
-                        depth0.1=apply(out$depth,1,quantile,p=0.1))
-    rownames(stats) <- NULL
+    write.csv(ans2,file=out.file)
   }
-  
-  return(c(list(stats=stats),out))
+  return(ref+alt)
 }
 
 

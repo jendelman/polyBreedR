@@ -2,49 +2,40 @@
 % Please edit documentation in R/dart_tag.R
 \name{dart_tag}
 \alias{dart_tag}
-\title{Process DArTag data}
+\title{Convert DArTag file to read count file}
 \usage{
 dart_tag(
-  filename,
+  dart.file,
   first.data.row = 9,
   first.data.col = 6,
-  ploidy,
-  geno.call = TRUE,
-  n.core = 1,
+  out.file,
+  map.file = NULL,
   AB.file = NULL
 )
 }
 \arguments{
-\item{filename}{DArTag CSV filename}
+\item{dart.file}{DArTag CSV filename}
 
-\item{first.data.row}{first data row}
+\item{first.data.row}{first data row in dart.file}
 
-\item{first.data.col}{first data column}
+\item{first.data.col}{first data column in dart.file}
 
-\item{ploidy}{ploidy}
+\item{out.file}{name of output file}
 
-\item{geno.call}{TRUE/FALSE}
+\item{map.file}{optional CSV file (marker, chrom, position) to integrate into the output}
 
-\item{n.core}{number of cores}
-
-\item{AB.file}{CSV file to convert to array dosage (allele B)}
+\item{AB.file}{optional CSV file (marker, REF) to convert to allele B dosage}
 }
 \value{
-Data frame with marker statistics and 5 matrices with dimensions markers x indiv
-\describe{
-\item{stats}{data frame with 10th percentile of depth and posterior prob for each marker}
-\item{depth}{(Alt+Ref) read count}
-\item{ratio}{Alt/(Alt+Ref)}
-\item{geno.mode}{Posterior mode for allele dosage}
-\item{prob}{Maximum posterior probability}
-\item{geno.mean}{Posterior mean for allele dosage}
-}
+marker x indiv matrix of read depths
 }
 \description{
-Process DArTag data
+Convert DArTag file to read count file
 }
 \details{
-Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. Genotype calls are made using the updog package (Gerard et al. 2018). If a sample has no reads at a marker, the genotype is NA and posterior probability equals 0.
+Designed for standard two-row format from DArT. Column 1 contains the AlleleID in format MarkerName|Haplotype. Haplotypes are named Ref,RefMatch,Alt,AltMatch,Other. Counts are combined for Ref + RefMatch, as well as Alt + AltMatch. Other haplotypes are discarded. 
 
-Standard output for genotype calls is dosage of Alt allele. Optionally, specify \code{AB.file} to output dosage of B allele from SNP array. The file must have columns named "marker" and "REF", where REF is either A or B. Only markers present in AB.file will be in the output.
+Output format contains the read counts for each marker x id combination in the format "count1|count2" (which is the input format for PolyOrigin).
+
+Use \code{AB.file} to convert REF/ALT counts from dart.file to A/B counts from SNP array. The file must have columns named "marker" and "REF", where REF is either A or B. Only markers present in AB.file will be in the output.
 }
