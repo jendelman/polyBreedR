@@ -4,19 +4,46 @@
 \alias{impute}
 \title{Impute missing marker data}
 \usage{
-impute(geno, method)
+impute(
+  in.file,
+  out.file,
+  ploidy,
+  method,
+  geno,
+  min.DP = 1,
+  max.missing,
+  params = NULL,
+  n.core = 1
+)
 }
 \arguments{
-\item{geno}{Matrix of allele dosages with dimensions markers x indiv}
+\item{in.file}{VCF input file}
 
-\item{method}{Either "mean" or "mode"}
-}
-\value{
-Imputed genotype matrix (markers x indiv)
+\item{out.file}{VCF output file}
+
+\item{ploidy}{ploidy}
+
+\item{method}{One of the following: "pop","EM","RF"}
+
+\item{geno}{One of the following: "GT","DS"}
+
+\item{min.DP}{genotypes below this depth are set to missing (default=1)}
+
+\item{max.missing}{remove markers above this threshold, as proportion of population}
+
+\item{params}{list of method-specific parameters}
+
+\item{n.core}{multicore processing}
 }
 \description{
-Impute marker data based on the population mean or mode
+Impute missing marker data
 }
 \details{
-Missing values are imputed with either the population mean or mode (most frequent value) for each marker
+Assumes input file is sorted by position. Markers with no genetic variance are removed.
+
+\code{method="pop"} imputes with the population mean for \code{geno="DS"} and population mode for \code{geno="GT"}.
+
+\code{method="EM"} uses parameter "tol" (default is 0.02, see rrBLUP A.mat documentation). Imputed values are truncated if needed to fall in the interval [0,ploidy].
+ 
+\code{method="RF"} uses parameters "ntree" (default 100) for number of trees and "nflank" (default 100) for the number of flanking markers (on each side) to use as predictors. Because RF first uses EM to generate a complete dataset, parameter "tol" is also recognized.
 }

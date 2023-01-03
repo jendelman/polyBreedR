@@ -12,6 +12,8 @@
 #' @return Vector with updated names
 #' 
 #' @export
+#' @importFrom utils write.csv
+
 update_alias <- function(x,alias,remove.space=TRUE,filename=NULL) {
   if (!is.null(filename)) {
     z <- read.csv(filename,check.names=F)

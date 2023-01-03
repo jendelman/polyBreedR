@@ -1,3 +1,7 @@
+Changes in 0.29
+* modified dart_tag to become dart2vcf
+* new functions gbs, impute, write_vcf
+
 Changes in 0.28
 * new function array2VCF for storing SNP array data in VCF
 
