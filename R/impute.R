@@ -92,7 +92,7 @@ impute <- function(in.file,out.file,ploidy,method,geno,min.DP=1,
     }
   }
 
-  data <- read.vcfR(file=in.file)
+  data <- read.vcfR(file=in.file,verbose=FALSE)
   fields <- vcf_field_names(data, tag = "FORMAT")$ID
   geno.key <- geno
   if (!(geno.key %in% fields))

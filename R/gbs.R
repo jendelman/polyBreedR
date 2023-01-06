@@ -8,6 +8,7 @@
 #' @param out.file VCF output file
 #' @param ploidy ploidy
 #' @param prior model for prior (see Details)
+#' @param bias TRUE/FALSE, whether to estimate allelic bias
 #' @param n.core number of cores
 #' 
 #' @return marker x indiv matrix of read depths
@@ -17,8 +18,13 @@
 #' @importFrom parallel makeCluster clusterExport parLapply stopCluster
 #' @importFrom stats anova lm chisq.test
 
-gbs <- function(in.file, out.file, ploidy, prior="norm", n.core=1) {
+gbs <- function(in.file, out.file, ploidy, prior="norm", bias=TRUE, n.core=1) {
   
+  if (bias) {
+    bias_init <- exp(c(-1, -0.5, 0, 0.5, 1))
+  } else {
+    bias_init <- 1
+  }
   prep <- vcf_prep(in.file)
   
   con.out <- file(out.file,"w")
@@ -38,12 +44,12 @@ gbs <- function(in.file, out.file, ploidy, prior="norm", n.core=1) {
     ref <- as.integer(sapply(x2,"[[",1))
     alt <- as.integer(sapply(x2,"[[",2))
     DP <- ref+alt
-    AVG.DP <- paste("AVG.DP",round(mean(DP),0),sep="=")
+    AVG.DP <- paste("AVG.DP",round(mean(DP),1),sep="=")
     
     n <- length(alt)
     tmp <- try(flexdog(refvec=alt,sizevec=alt+ref,
-                       ploidy=ploidy,model=prior,
-                       verbose=FALSE),silent=TRUE)
+                       ploidy=ploidy,model=prior,bias_init=bias_init,
+                       verbose=FALSE,update_bias=bias),silent=TRUE)
     if (!inherits(tmp,"try-error")) {
       AF <- mean(tmp$geno,na.rm=T)/ploidy
       AF.GT <- paste("AF.GT",round(AF,3),sep="=")

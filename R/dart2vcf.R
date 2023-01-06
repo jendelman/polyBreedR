@@ -97,19 +97,8 @@ dart2vcf <- function(counts.file, dosage.file, vcf.file, ploidy,
   AF <- round(alt/apply(DP,1,sum),3)
   AF[is.na(AF)] <- "."
   
-  make.info <- function(x) {
-    m <- ncol(x)
-    z <- paste0(paste(colnames(x),collapse="=K;"),"=K")
-    apply(x,1,function(u,z){
-      for (i in 1:m) {
-        z <- sub("K",as.character(u[i]),z)
-      }
-      return(z)
-    },z=z)
-  }
-  
-  info <- make.info(cbind(NS=NS,
-                          AVG.DP=AVG.DP,
+  info <- make_info(cbind(NS=NS,
+                          AVG.DP=round(AVG.DP,1),
                           AF=AF))
   fixed <- cbind(map[,c("chrom","position","marker")],REF.ALT,
         rep(".",m),rep(".",m),info)

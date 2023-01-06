@@ -64,3 +64,14 @@ make_GT <- function(x,ploidy) {
   }
   return(paste(y,collapse="/"))
 }
+
+make_info <- function(x) {
+  m <- ncol(x)
+  z <- paste0(paste(colnames(x),collapse="=K;"),"=K")
+  apply(x,1,function(u,z){
+    for (i in 1:m) {
+      z <- sub("K",as.character(u[i]),z)
+    }
+    return(z)
+  },z=z)
+}

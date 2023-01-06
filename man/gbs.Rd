@@ -4,7 +4,7 @@
 \alias{gbs}
 \title{Genotype calls for GBS}
 \usage{
-gbs(in.file, out.file, ploidy, prior = "norm", n.core = 1)
+gbs(in.file, out.file, ploidy, prior = "norm", bias = TRUE, n.core = 1)
 }
 \arguments{
 \item{in.file}{VCF input file}
@@ -14,6 +14,8 @@ gbs(in.file, out.file, ploidy, prior = "norm", n.core = 1)
 \item{ploidy}{ploidy}
 
 \item{prior}{model for prior (see Details)}
+
+\item{bias}{TRUE/FALSE, whether to estimate allelic bias}
 
 \item{n.core}{number of cores}
 }
