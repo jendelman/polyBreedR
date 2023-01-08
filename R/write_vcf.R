@@ -51,7 +51,7 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
     "##INFO=<ID=AB,Number=1,Type=Float,Description=\"Allelic Bias\">",
     "##INFO=<ID=SE,Number=1,Type=Integer,Description=\"Sequencing Error (PHRED)\">",
     "##INFO=<ID=OD,Number=1,Type=Integer,Description=\"OverDispersion (PHRED)\">",
-    "##INFO=<ID=AF.GT,Number=1,Type=Float,Description=\"Allele Frequency based on GT\">",
+    "##INFO=<ID=AF.GT,Number=A,Type=Float,Description=\"Allele Frequency based on GT\">",
     "##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">",
     "##INFO=<ID=MIN.DP,Number=1,Type=Integer,Description=\"smallest mean DP for GT group\">",
     "##INFO=<ID=HWE.P,Number=1,Type=Integer,Description=\"p-value for Hardy-Weinberg Equil (PHRED)\">",
@@ -84,7 +84,7 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
   format.meta <- c("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
   "##FORMAT=<ID=AD,Number=R,Type=Integer,Description=\"Allele Depth\">",
   "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Sample Depth\">",
-  "##FORMAT=<ID=DS,Number=1,Type=Float,Description=\"Posterior Mean Dosage\">",
+  "##FORMAT=<ID=DS,Number=A,Type=Float,Description=\"Posterior Mean Dosage\">",
   "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">")
 
   ix <- lapply(as.list(paste0("ID=",format.keys)),grep,x=format.meta,fixed=T)
