@@ -1,6 +1,6 @@
-#' Impute missing marker data 
+#' Impute missing data for bi-allelic markers
 #' 
-#' Impute missing marker data
+#' Impute missing data for bi-allelic markers
 #' 
 #' Assumes input file is sorted by position. Markers with no genetic variance are removed.
 #'
@@ -93,18 +93,28 @@ impute <- function(in.file,out.file,ploidy,method,geno,min.DP=1,
   }
 
   data <- read.vcfR(file=in.file,verbose=FALSE)
+  ixa <- grep(",",data@fix[,"ALT"])
   fields <- vcf_field_names(data, tag = "FORMAT")$ID
   geno.key <- geno
   if (!(geno.key %in% fields))
     stop(sub("Q",geno.key,"Q not present in VCF file"))
   
   geno <- extract.gt(data,element=geno.key)
+  all.marks <- apply(data@fix[,c("CHROM","POS")],1,paste,collapse=":")
+  rownames(geno) <- all.marks
+  if (length(ixa) > 0) {
+    cat("Multi-allelic variants detected and will be removed.\n")
+    geno <- geno[-ixa,]
+  }
   if (min.DP > 1) {
     dnames <- dimnames(geno)
     geno <- split(geno,f=1:nrow(geno))
     if (!("DP" %in% fields))
       stop("Sample DP not present in VCF file")
-    DP <- lapply(split(extract.gt(data,element="DP"),f=1:length(geno)),as.integer)
+    DP <- extract.gt(data,element="DP")
+    if (length(ixa) > 0)
+      DP <- DP[-ixa,]
+    DP <- lapply(split(DP,f=1:length(geno)),as.integer)
     geno <- t(mapply(FUN=function(x,dp,min.DP){x[dp < min.DP] <- NA; x},geno,DP,min.DP=min.DP))
     dimnames(geno) <- dnames
   }
@@ -124,6 +134,7 @@ impute <- function(in.file,out.file,ploidy,method,geno,min.DP=1,
   geno <- geno[ix[iu],,drop=FALSE]
   m <- nrow(geno)
   marks <- rownames(geno)
+  ik <- match(marks,all.marks)
   
   #begin imputation
   #geno.imp is transposed vs geno
@@ -180,7 +191,7 @@ impute <- function(in.file,out.file,ploidy,method,geno,min.DP=1,
     geno.imp <- round(t(geno.imp),1)
   }
   dimnames(geno.imp) <- dimnames(geno)
-  
+
   if (geno.key=="GT")
     fields <- setdiff(fields,"GQ")
   nf <- length(fields)
@@ -190,10 +201,11 @@ impute <- function(in.file,out.file,ploidy,method,geno,min.DP=1,
     if (fields[i]==geno.key) {
       geno[[i]] <- geno.imp
     } else {
-      geno[[i]] <- extract.gt(data,element=fields[i])[marks,]
+      geno[[i]] <- extract.gt(data,element=fields[i])[ik,]
     }
   }
-  fixed <- data@fix[match(marks,data@fix[,"ID"]),]
+  
+  fixed <- data@fix[ik,]
   fixed[,"INFO"] <- "."
   fixed[is.na(fixed)] <- "."
   write_vcf(filename=out.file, fixed=fixed, geno=geno)

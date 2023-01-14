@@ -1,3 +1,6 @@
+Changes in 0.30
+* minor bug in impute
+
 Changes in 0.29
 * modified dart_tag to become dart2vcf
 * new functions gbs, impute, write_vcf
