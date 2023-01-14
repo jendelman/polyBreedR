@@ -2,7 +2,7 @@
 % Please edit documentation in R/impute.R
 \name{impute}
 \alias{impute}
-\title{Impute missing marker data}
+\title{Impute missing data for bi-allelic markers}
 \usage{
 impute(
   in.file,
@@ -36,7 +36,7 @@ impute(
 \item{n.core}{multicore processing}
 }
 \description{
-Impute missing marker data
+Impute missing data for bi-allelic markers
 }
 \details{
 Assumes input file is sorted by position. Markers with no genetic variance are removed.

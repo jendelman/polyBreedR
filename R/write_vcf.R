@@ -38,12 +38,15 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
   con <- file(filename,open="w")
   writeLines(con=con, text="##fileformat=VCFv4.3")
   
+  if (!is.null(other.meta))
+    writeLines(con=con, text=paste0("##",other.meta))
+  
   contigs <- apply(array(unique(fixed[,"CHROM"])),1,
               function(z){sub("Q",z,"##contig=<ID=Q>")}) 
   writeLines(con=con, text=contigs)
   
   x <- lapply(strsplit(fixed[,"INFO"],split=";"),strsplit,split="=")
-  info.keys <- unique(unlist(lapply(x,function(z){sapply(z,"[[",1)}),recursive=T))
+  info.keys <- setdiff(unique(unlist(lapply(x,function(z){sapply(z,"[[",1)}),recursive=T)),".")
   
   info.meta <- c("##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">",
     "##INFO=<ID=AVG.DP,Number=1,Type=Float,Description=\"Average Sample Depth\">",
@@ -58,13 +61,14 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
     "##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Allele count in genotypes\">",
     "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Total number of alleles\">")
     
-  x2 <- lapply(info.keys,function(x){sub("Q",x,"<ID=Q,")})
-  ix <- lapply(x2,grep,x=info.meta,fixed=T)
-  iv <- which(sapply(ix,length)==0)
-  if (length(iv) > 1)
-    stop("Unrecognized keys in INFO")
-  
-  writeLines(con=con, text=info.meta[unlist(ix)])
+  if (length(info.keys) > 0) {
+    x2 <- lapply(info.keys,function(x){sub("Q",x,"<ID=Q,")})
+    ix <- lapply(x2,grep,x=info.meta,fixed=T)
+    iv <- which(sapply(ix,length)==0)
+    if (length(iv) > 1)
+      stop("Unrecognized keys in INFO")
+    writeLines(con=con, text=info.meta[unlist(ix)])
+  }
   
   m <- nrow(fixed)
   stopifnot(m==nrow(geno[[1]]))
@@ -93,9 +97,6 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
     stop("Unrecognized FORMAT in geno")
   
   writeLines(con=con, text=format.meta[unlist(ix)])
-  
-  if (!is.null(other.meta))
-    writeLines(con=con, text=paste0("##",other.meta))
   
   writeLines(con=con,
              text=paste(c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT",id),
