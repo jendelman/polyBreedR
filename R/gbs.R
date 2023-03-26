@@ -2,7 +2,7 @@
 #' 
 #' Genotype calls for genotype-by-sequencing (GBS) data
 #' 
-#' VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, AVG.DP, AF.GT, AB, OD, SE, MIN.DP, HWE.P.
+#' VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE, MIN.DP, HWE.P.
 #' 
 #' @param in.file VCF input file
 #' @param out.file VCF output file
@@ -41,10 +41,18 @@ gbs <- function(in.file, out.file, ploidy, prior="norm", bias=TRUE, n.core=1) {
   
   f1 <- function(AD,ploidy,prior) {
     x2 <- strsplit(AD,split=",",fixed=T)
-    ref <- as.integer(sapply(x2,"[[",1))
-    alt <- as.integer(sapply(x2,"[[",2))
+    m <- length(x2)
+    ref <- alt <- integer(m)
+    ok <- which(sapply(x2,length)==2)
+    ref[ok] <- as.integer(sapply(x2[ok],"[[",1))
+    alt[ok] <- as.integer(sapply(x2[ok],"[[",2))
+    if (any(is.na(ref)))
+      ref[is.na(ref)] <- 0
+    if (any(is.na(alt)))
+      alt[is.na(alt)] <- 0
+    
     DP <- ref+alt
-    AVG.DP <- paste("AVG.DP",round(mean(DP),1),sep="=")
+    DP.AVG <- paste("DP.AVG",round(mean(DP),1),sep="=")
     
     n <- length(alt)
     tmp <- try(flexdog(refvec=alt,sizevec=alt+ref,
@@ -63,9 +71,9 @@ gbs <- function(in.file, out.file, ploidy, prior="norm", bias=TRUE, n.core=1) {
         OD <- paste("OD",floor(-10*log10(max(1e-9,tmp$od))),sep="=")
         MIN.DP <- paste("MIN.DP",round(min(tapply(DP,tmp$geno,mean,na.rm=T)),0),sep="=")
         HWE.P <- paste("HWE.P",round(-10*log10(HWE.P),0),sep="=")
-        info <- paste(c(NS,AVG.DP,AF.GT,AB,SE,OD,MIN.DP,HWE.P),collapse=";")
+        info <- paste(c(NS,DP.AVG,AF.GT,AB,SE,OD,MIN.DP,HWE.P),collapse=";")
       } else {
-        info <- paste(c(NS,AVG.DP,AF.GT),collapse=";")
+        info <- paste(c(NS,DP.AVG,AF.GT),collapse=";")
       }
       
       GT <- apply(array(tmp$geno),1,make_GT,ploidy=ploidy)
@@ -76,7 +84,7 @@ gbs <- function(in.file, out.file, ploidy, prior="norm", bias=TRUE, n.core=1) {
     } else {
       GT <- rep(make_GT(as.integer(NA),ploidy=ploidy),n)
       GQ <- DS <- rep(".",n)
-      info <- AVG.DP
+      info <- DP.AVG
     }
     z <- apply(cbind(GT,AD,as.character(DP),DS,GQ),1,paste,collapse=":")
     return(paste(c(info,"GT:AD:DP:DS:GQ",z),collapse="\t"))

@@ -29,7 +29,7 @@ vcf_prep <- function(vcf.file) {
   
   metadata <- append(metadata,
                   c("##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">",
-                    "##INFO=<ID=AVG.DP,Number=1,Type=Float,Description=\"Average Sample Depth\">",
+                    "##INFO=<ID=DP.AVG,Number=1,Type=Float,Description=\"Average Sample Depth\">",
                     "##INFO=<ID=AF.GT,Number=A,Type=Float,Description=\"Allele Frequency based on GT\">",
                     "##INFO=<ID=AB,Number=1,Type=Float,Description=\"Allelic Bias\">",
                     "##INFO=<ID=SE,Number=1,Type=Integer,Description=\"Sequencing Error (PHRED)\">",
