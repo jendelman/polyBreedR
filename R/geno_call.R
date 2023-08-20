@@ -17,11 +17,19 @@
 #' @importFrom utils read.csv
 
 geno_call <- function(data,filename,model.ploidy=4L,sample.ploidy=4L,min.posterior=0,transform=TRUE) {
+  
+  model.params <- as.matrix(read.csv(file=filename,as.is=T,row.names = 1))
+  if (is.null(model.ploidy)) {
+    model.ploidy <- ncol(model.params)/3 - 1
+  }
+  if (is.null(sample.ploidy)) {
+    sample.ploidy <- model.ploidy
+  }
+  
   stopifnot(sample.ploidy <= model.ploidy)
   stopifnot(sample.ploidy %in% c(2L,4L))
   stopifnot(model.ploidy %in% c(2L,4L))
 
-  model.params <- as.matrix(read.csv(file=filename,as.is=T,row.names = 1))
   iv <- which(rownames(data) %in% rownames(model.params))
   snp.id <- rownames(data)[iv]
   sample.id <- colnames(data)

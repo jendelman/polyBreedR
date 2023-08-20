@@ -3,6 +3,7 @@
 #' Create VCFv4.3 file
 #' 
 #' Several standard INFO key are recognized:
+#' ##INFO=<ID=REF,Number=A,Type=Character,Description=\"Array allele (A/B) in reference genome\">
 #' ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
 #' ##INFO=<ID=AVG.DP,Number=1,Type=Float,Description="Average Sample Depth">
 #' ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
@@ -35,6 +36,8 @@
 write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
 
   stopifnot(colnames(fixed)==c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"))
+  fixed[is.na(fixed)] <- "."
+  
   con <- file(filename,open="w")
   writeLines(con=con, text="##fileformat=VCFv4.3")
   
@@ -48,7 +51,9 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
   x <- lapply(strsplit(fixed[,"INFO"],split=";"),strsplit,split="=")
   info.keys <- setdiff(unique(unlist(lapply(x,function(z){sapply(z,"[[",1)}),recursive=T)),".")
   
-  info.meta <- c("##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">",
+  info.meta <- c("##INFO=<ID=REF,Number=A,Type=Character,Description=\"Array allele (A/B) in reference genome\">",
+    "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of samples with data\">",
+    "##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes\">",
     "##INFO=<ID=AVG.DP,Number=1,Type=Float,Description=\"Average Sample Depth\">",
     "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">",
     "##INFO=<ID=AB,Number=1,Type=Float,Description=\"Allelic Bias\">",
@@ -87,6 +92,7 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
   
   format.meta <- c("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
   "##FORMAT=<ID=AD,Number=R,Type=Integer,Description=\"Allele Depth\">",
+  "##FORMAT=<ID=AI,Number=R,Type=Integer,Description=\"Normalized Allele Intensity x 100%\">",
   "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Sample Depth\">",
   "##FORMAT=<ID=DS,Number=A,Type=Float,Description=\"Posterior Mean Dosage\">",
   "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">")
@@ -106,9 +112,13 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
     tmp2 <- character(n)
     for (j in 1:n) {
       tmp <- geno[[1]][i,j]
-      for (k in 2:nf) 
-        tmp <- c(tmp,geno[[k]][i,j])
-      tmp2[j] <- paste(tmp,collapse=":")
+      if (nf > 1) {
+        for (k in 2:nf) 
+          tmp <- c(tmp,geno[[k]][i,j])
+        tmp2[j] <- paste(tmp,collapse=":")
+      } else {
+        tmp2[j] <- tmp
+      }
     }
     writeLines(con=con,text=paste(c(as.character(fixed[i,]),FORMAT,tmp2),collapse="\t"))
   }

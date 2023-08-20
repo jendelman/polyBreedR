@@ -1,3 +1,9 @@
+Changes in 0.33
+* updates to gbs function
+* fr2vcf renamed to array2vcf, now with options for both long and wide format
+* created impute_L2H function
+* update_alias removes leading zeros in progeny id
+
 Changes in 0.32
 * handling of missing AD in gbs
 

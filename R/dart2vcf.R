@@ -59,7 +59,7 @@ dart2vcf <- function(counts.file, dosage.file, vcf.file, ploidy,
     if (length(k)==1) {
       return(c(hap.ref[k],hap.alt[k]))
     } else {
-      return(c(".","."))
+      return(c("N","N"))
     }
   }))
   

@@ -20,6 +20,7 @@ Create VCFv4.3 file
 }
 \details{
 Several standard INFO key are recognized:
+##INFO=<ID=REF,Number=A,Type=Character,Description=\"Array allele (A/B) in reference genome\">
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
 ##INFO=<ID=AVG.DP,Number=1,Type=Float,Description="Average Sample Depth">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">

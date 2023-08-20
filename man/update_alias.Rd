@@ -13,7 +13,7 @@ update_alias(x, alias, remove.space = TRUE, filename = NULL)
 
 \item{remove.space}{TRUE/FALSE}
 
-\item{filename}{update names in file (variable "id")}
+\item{filename}{update names in CSV file}
 }
 \value{
 Vector with updated names
@@ -22,5 +22,5 @@ Vector with updated names
 Update names based on data frame with alias and preferred name
 }
 \details{
-Parameter \code{remove.space} indicates whether blank spaces should be removed before string matching
+Parameter \code{remove.space} indicates whether blank spaces should be removed before string matching.
 }
