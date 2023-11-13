@@ -4,34 +4,31 @@
 \alias{impute_L2H}
 \title{Impute from low to high density markers}
 \usage{
-impute_L2H(
-  high.file,
-  low.file,
-  out.file,
-  ploidy,
-  params = list(format = "GT", n.tree = 100, n.mark = 100),
-  n.core = 1
-)
+impute_L2H(high.file, low.file, out.file, method, params = list(), n.core = 1)
 }
 \arguments{
-\item{high.file}{name of high density VCF file}
+\item{high.file}{name of high density file}
 
-\item{low.file}{name of low density VCF file}
+\item{low.file}{name of low density file}
 
-\item{out.file}{name of CSV output file for the imputed dataset}
+\item{out.file}{name of CSV output file for imputed data}
 
-\item{ploidy}{ploidy}
+\item{method}{"RF" or "PO" (see Details)}
 
 \item{params}{list of parameters (see Details)}
 
 \item{n.core}{multicore processing}
 }
 \value{
-vector of mean OOB error (vs. number of trees)
+for RF method, vector of mean OOB error (vs. number of trees)
 }
 \description{
 Impute from low to high density markers
 }
 \details{
-Missing data in high density file is imputed with the population mean (DS) or mode (GT) for each marker. The Random Forest package is used for imputing up to high density. Argument \code{params} recognizes the following parameters: "format","n.tree","n.mark". Format can have values "GT" or "DS" (default = "GT"), n.tree is the number of trees (default = 100), and n.mark is the number of markers to use as predictors (default = 200), chosen based on minimum distance to the target. Classification trees are used for GT and regression trees for DS. Any markers in low.file that are not present in the high.file or with an identical position are discarded.
+Two methods are implemented: Random Forest (RF) and PolyOrigin (PO)
+
+With RF, any missing data are imputed separately for each file, using the population mean (DS) or mode (GT) for each marker. For RF, argument \code{params} recognizes the following parameters: "format","n.tree","n.mark". Format can have values "GT" or "DS" (default = "GT"), n.tree is the number of trees (default = 100), and n.mark is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. Classification trees are used for GT and regression trees for DS. Any markers in low.file that are not present in the high.file or with an identical position are discarded.
+
+For method PO, the high density file is the phased parents file from PolyOrigin, which has columns marker, chromosome, position (cM), followed by the phased parental genotypes. Argument \code{params} recognized the following parameters: "ped.file" (default is "ped.csv"), "map.file" (default is NULL), and "format", which can take values "GT" (default) or "AD". The map positions in the high density input file from PO are in cM. To export the imputed data with bp positions, provide name of "map.file" with this information. You must enable command line calls to Julia for the PO method.
 }

@@ -4,10 +4,12 @@
 \alias{GT2DS}
 \title{Convert GT to DS}
 \usage{
-GT2DS(GT)
+GT2DS(GT, diploidize = FALSE)
 }
 \arguments{
 \item{GT}{GT string}
+
+\item{diploidize}{TRUE/FALSE}
 }
 \value{
 numeric DS

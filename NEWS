@@ -1,3 +1,9 @@
+Changes in 0.34
+* GT2DS function has diploidize option
+* impute_L2H has PolyOrigin option
+* madc function
+* vcf2csv function
+
 Changes in 0.33
 * updates to gbs function
 * fr2vcf renamed to array2vcf, now with options for both long and wide format
