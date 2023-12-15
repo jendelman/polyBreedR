@@ -89,7 +89,7 @@ dart2vcf <- function(counts.file, dosage.file, vcf.file, ploidy,
   
   #put all together
   NS <- apply(DP,1,function(x){sum(x>0)})
-  AVG.DP <- apply(DP,1,mean)
+  DP.AVG <- apply(DP,1,mean)
   
   alt <- apply(AD,1,function(x){
     sum(as.integer(sapply(strsplit(x,split=",",fixed=T),"[[",2)))
@@ -98,7 +98,7 @@ dart2vcf <- function(counts.file, dosage.file, vcf.file, ploidy,
   AF[is.na(AF)] <- "."
   
   info <- make_info(cbind(NS=NS,
-                          AVG.DP=round(AVG.DP,1),
+                          DP.AVG=round(DP.AVG,1),
                           AF=AF))
   fixed <- cbind(map[,c("chrom","position","marker")],REF.ALT,
         rep(".",m),rep(".",m),info)

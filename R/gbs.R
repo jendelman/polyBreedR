@@ -2,7 +2,7 @@
 #' 
 #' Genotype calls for genotype-by-sequencing (GBS) data
 #' 
-#' VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE, MIN.DP, HWE.P.
+#' VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 #' 
 #' @param in.file VCF input file
 #' @param out.file VCF output file
@@ -65,13 +65,13 @@ gbs <- function(in.file, out.file, ploidy, prior="norm", bias=TRUE, n.core=1) {
       
       if (AF > 0) {
         p <- apply(array(0:ploidy),1,function(z){AF^z*(1-AF)^(ploidy-z)*choose(ploidy,z)})
-        HWE.P <- max(chisq.test(x=table(factor(tmp$geno,levels=0:ploidy)),p=p)$p.value,1e-9)
+        #HWE.P <- max(chisq.test(x=table(factor(tmp$geno,levels=0:ploidy)),p=p)$p.value,1e-9)
         AB <- paste("AB",round(tmp$bias,1),sep="=")
         SE <- paste("SE",floor(-10*log10(max(1e-9,tmp$seq))),sep="=")
         OD <- paste("OD",floor(-10*log10(max(1e-9,tmp$od))),sep="=")
-        MIN.DP <- paste("MIN.DP",round(min(tapply(DP,tmp$geno,mean,na.rm=T)),0),sep="=")
-        HWE.P <- paste("HWE.P",round(-10*log10(HWE.P),0),sep="=")
-        info <- paste(c(NS,DP.AVG,AF.GT,AB,SE,OD,MIN.DP,HWE.P),collapse=";")
+        #MIN.DP <- paste("MIN.DP",round(min(tapply(DP,tmp$geno,mean,na.rm=T)),0),sep="=")
+        #HWE.P <- paste("HWE.P",round(-10*log10(HWE.P),0),sep="=")
+        info <- paste(c(NS,DP.AVG,AF.GT,AB,SE,OD),collapse=";")
       } else {
         info <- paste(c(NS,DP.AVG,AF.GT),collapse=";")
       }

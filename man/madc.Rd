@@ -2,18 +2,23 @@
 % Please edit documentation in R/madc.R
 \name{madc}
 \alias{madc}
-\title{Multi-allelic markers}
+\title{Multi-allelic genotype calls from DArTag}
 \usage{
-madc(madc.file, marker, min.AD = 5)
+madc(madc.file, marker = "CDF1", min.AD = 5)
 }
 \arguments{
-\item{madc.file}{MADC file}
+\item{madc.file}{MADC filename}
 
-\item{marker}{Name of marker}
+\item{marker}{Name of marker ("CDF1" is only option so far)}
+
+\item{min.AD}{minimum AD for discovery}
 }
 \value{
 data frame of counts and diploid GT
 }
 \description{
-Multi-allelic markers
+Genotype calls from the DArTag MADC (Missing Allele Discovery Count) file
+}
+\details{
+Due to multi-allelism, for some trait markers a correct interpretation is not possible using the collapsed counts file; the MADC file is needed. Currently, the only marker implemented is CDF1 for potato DArTag, which assumes samples are diploid and there are no CDF1.1 homozygotes. The \code{min.AD} parameter establishes the threshold at which an allele is considered present, which is needed to account for sequencing and other errors.
 }

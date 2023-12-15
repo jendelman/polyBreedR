@@ -1,15 +1,18 @@
-#' Multi-allelic markers
+#' Multi-allelic genotype calls from DArTag
 #' 
-#' Multi-allelic markers
+#' Genotype calls from the DArTag MADC (Missing Allele Discovery Count) file
 #' 
-#' @param madc.file MADC file
-#' @param marker Name of marker
+#' Due to multi-allelism, for some trait markers a correct interpretation is not possible using the collapsed counts file; the MADC file is needed. Currently, the only marker implemented is CDF1 for potato DArTag, which assumes samples are diploid and there are no CDF1.1 homozygotes. The \code{min.AD} parameter establishes the threshold at which an allele is considered present, which is needed to account for sequencing and other errors. 
+#' 
+#' @param madc.file MADC filename
+#' @param marker Name of marker ("CDF1" is only option so far)
+#' @param min.AD minimum AD for discovery 
 #'
 #' @return data frame of counts and diploid GT
 #' @export
 #' @importFrom data.table fread
 
-madc <- function(madc.file, marker, min.AD=5) {
+madc <- function(madc.file, marker="CDF1", min.AD=5) {
   
   if (toupper(marker)=="CDF1") {
     data <- fread(madc.file,skip=7)

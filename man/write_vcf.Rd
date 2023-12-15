@@ -22,15 +22,13 @@ Create VCFv4.3 file
 Several standard INFO key are recognized:
 ##INFO=<ID=REF,Number=A,Type=Character,Description=\"Array allele (A/B) in reference genome\">
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
-##INFO=<ID=AVG.DP,Number=1,Type=Float,Description="Average Sample Depth">
+##INFO=<ID=DP.AVG,Number=1,Type=Float,Description="Average Sample Depth">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
 ##INFO=<ID=AB,Number=1,Type=Float,Description="Allelic Bias">
 ##INFO=<ID=SE,Number=1,Type=Integer,Description="Sequencing Error (PHRED)">
 ##INFO=<ID=OD,Number=1,Type=Integer,Description="OverDispersion (PHRED)">
 ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
 ##INFO=<ID=AF.GT,Number=A,Type=Float,Description="Allele Frequency based on GT">
-##INFO=<ID=MIN.DP,Number=1,Type=Integer,Description="smallest mean DP for GT group">
-##INFO=<ID=HWE.P,Number=1,Type=Integer,Description="p-value for Hardy-Weinberg Equil (PHRED)">
 ##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes">"
 ##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles">"
 Every element of \code{geno} is m x n matrix (m variants, n samples), e.g., AD, GT. The FORMAT field is created from the order and names of \code{geno}. Sample names taken from colnames of \code{geno}. Metadata for \code{geno} is generated from the names of the list:

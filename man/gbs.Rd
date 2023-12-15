@@ -26,5 +26,5 @@ marker x indiv matrix of read depths
 Genotype calls for genotype-by-sequencing (GBS) data
 }
 \details{
-VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE, MIN.DP, HWE.P.
+VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 }
