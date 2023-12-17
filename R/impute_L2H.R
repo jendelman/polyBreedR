@@ -46,12 +46,13 @@ impute_L2H <- function(high.file, low.file, out.file, method, params=list(),
   impute.RF <- function(i,geno.train,geno.test,pred.ix,params) {
     y <- geno.train[,i]
     ntest <- nrow(geno.test)
+    prix <- as.character(na.omit(pred.ix[i,]))
     if (params$format=="GT") {
       if (length(unique(y))==1) {
         return(list(pred=rep(y[1],ntest), error=rep(0,params$n.tree)))
       } else {
-        ans <- randomForest(y=factor(y), x=geno.train[,pred.ix[i,]],
-                            xtest=geno.test[,pred.ix[i,]],
+        ans <- randomForest(y=factor(y), x=geno.train[,prix],
+                            xtest=geno.test[,prix],
                             ntree=params$n.tree)
         return(list(pred=as.character(ans$test$predicted), error=ans$err.rate[,1]))
       }
@@ -59,8 +60,8 @@ impute_L2H <- function(high.file, low.file, out.file, method, params=list(),
       if (sd(y)==0) {
         return(list(pred=rep(y[1],ntest), error=rep(0,params$n.tree)))
       } else {
-        ans <- suppressWarnings(randomForest(y=y, x=geno.train[,pred.ix[i,]],
-                                             xtest=geno.test[,pred.ix[i,]],
+        ans <- suppressWarnings(randomForest(y=y, x=geno.train[,prix],
+                                             xtest=geno.test[,prix],
                                              ntree=params$n.tree))
         return(list(pred=ans$test$predicted, error=ans$mse))
       }
@@ -130,11 +131,12 @@ impute_L2H <- function(high.file, low.file, out.file, method, params=list(),
       clusterExport(cl=cl,varlist=NULL)
     }
     
-    pred.ix <- matrix(0,nrow=mi,ncol=params$n.mark)
+    pred.ix <- matrix(as.character(NA),nrow=mi,ncol=params$n.mark)
     rownames(pred.ix) <- map.imp$marker
     for (i in 1:mi) {
       ix <- which(map2$chrom==map.imp$chrom[i])
-      pred.ix[i,] <- map2$marker[ix[order(abs(map2$pos[ix]-map.imp$pos[i]))[1:params$n.mark]]]
+      zz <- min(params$n.mark,length(ix))
+      pred.ix[i,1:zz] <- map2$marker[ix[order(abs(map2$pos[ix]-map.imp$pos[i]))[1:zz]]]
     }
       
     if (n.core > 1) {

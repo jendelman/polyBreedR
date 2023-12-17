@@ -6,6 +6,8 @@
 #' 
 #' Genotype calls will attempt to be imported from the GS Final Report when \code{model.file=NULL}. For diploids, columns named "Allele 1 - AB" and "Allele 2 - AB" are expected. For tetraploids, a single column named "Alleles - AB" is expected. 
 #' 
+#' It is assumed that the parameters in \code{model.file} lead to genotype calls for the dosage of allele B. For a VCF file, genotype calls need to be based on the dosage of ALT. By default, it is assumed that A is the REF allele. For variants where B is REF, include "REF=B" as INFO in the VCF \code{map.file}. 
+#' 
 #' @param array.file name of input file with SNP array allele intensities
 #' @param map.file vcf file with map positions for the markers
 #' @param model.file normal mixture model parameters for genotype calls
