@@ -107,7 +107,7 @@ impute_L2H <- function(high.file, low.file, out.file, method, params=list(),
       dimnames(geno1) <- list(colnames(high)[-(1:3)],map1$marker)
     }
     if ("exclude" %in% np) {
-      geno1 <- geno1[setdiff(colnames(geno1),params$exclude),]
+      geno1 <- geno1[setdiff(rownames(geno1),params$exclude),]
     }
     
     vcf2 <- length(grep("VCF",toupper(low.file),fixed=T)) > 0
