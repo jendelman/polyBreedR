@@ -1,5 +1,7 @@
 Changes in 0.35
-* tidying up
+* changed behavior of impute_L2H for RF method
+* impute_L2H accepts both VCF and CSV input
+* GT2DS has multicore option
 
 Changes in 0.34
 * GT2DS function has diploidize option

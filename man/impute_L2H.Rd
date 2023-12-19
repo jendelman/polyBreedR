@@ -20,15 +20,15 @@ impute_L2H(high.file, low.file, out.file, method, params = list(), n.core = 1)
 \item{n.core}{multicore processing}
 }
 \value{
-for RF method, vector of mean OOB error (vs. number of trees)
+for RF method, matrix of OOB error with dimensions markers x trees
 }
 \description{
 Impute from low to high density markers
 }
 \details{
-Two methods are implemented: Random Forest (RF) and PolyOrigin (PO)
+Two methods are available: Random Forest (RF) and PolyOrigin (PO)
 
-With RF, any missing data are imputed separately for each file, using the population mean (DS) or mode (GT) for each marker. For RF, argument \code{params} recognizes the following parameters: "format","n.tree","n.mark". Format can have values "GT" or "DS" (default = "GT"), n.tree is the number of trees (default = 100), and n.mark is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. Classification trees are used for GT and regression trees for DS. Any markers in low.file that are not present in the high.file or with an identical position are discarded.
+With RF, any missing data are imputed separately for each file, using the population mean (DS) or mode (GT) for each marker. For RF, argument \code{params} recognizes the following parameters: "format","n.tree","n.mark","exclude". \code{format} can have values "GT" or "DS" (default = "GT"). \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. \code{exclude} is a vector of sample names to exclude from the high density file, which is useful for cross-validation. Classification trees are used for GT and regression trees for DS. Both VCF and CSV files are recognized for the input files with method RF, based on the file extension. For CSV files, the first three columns should be marker, chrom, pos, and parameter \code{format} still controls whether classification or regression trees are used. 
 
 For method PO, the high density file is the phased parents file from PolyOrigin, which has columns marker, chromosome, position (cM), followed by the phased parental genotypes. Argument \code{params} recognized the following parameters: "ped.file" (default is "ped.csv"), "map.file" (default is NULL), and "format", which can take values "GT" (default) or "AD". The map positions in the high density input file from PO are in cM. To export the imputed data with bp positions, provide name of "map.file" with this information. You must enable command line calls to Julia for the PO method.
 }

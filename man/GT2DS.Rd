@@ -2,18 +2,23 @@
 % Please edit documentation in R/GT2DS.R
 \name{GT2DS}
 \alias{GT2DS}
-\title{Convert GT to DS}
+\title{Convert GT to ALT allele dosage (DS)}
 \usage{
-GT2DS(GT, diploidize = FALSE)
+GT2DS(GT, diploidize = FALSE, n.core = 1)
 }
 \arguments{
 \item{GT}{GT string}
 
 \item{diploidize}{TRUE/FALSE}
+
+\item{n.core}{number of cores}
 }
 \value{
-numeric DS
+integer data with same dimensions as GT
 }
 \description{
-Convert GT to DS
+Convert GT to ALT allele dosage (DS)
+}
+\details{
+If \code{diploidize} is TRUE, data are recoded as a diploid {0,1,2}.
 }
