@@ -50,7 +50,7 @@ impute_PO <- function(high.file, low.file, low.format="GT", ped.file, out.prefix
     
   combo <- merge(high,data.frame(marker=rownames(geno),geno,check.names = F),
                  by="marker",all.x=T)
-  combo <- combo[order(combo$chrom,combo$pos),]
+  combo <- combo[match(map$marker,combo$marker),]
   if (low.format=="AD")
     combo[is.na(combo)] <- "0|0"
   
