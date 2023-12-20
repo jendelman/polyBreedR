@@ -8,13 +8,13 @@
 #' 
 #' VCF is assumed for the low-density file. The pedigree file must follow PolyOrigin format.
 #' 
+#' Two output files are generated, corresponding to the posterior maximum and mean genotypes.
+#' 
 #' @param high.file name of high density file with phased parents
 #' @param low.file name of low density VCF file with progeny
 #' @param low.format either "GT" (default) or "AD"
 #' @param ped.file pedigree file for progeny (must follow PO format)
-#' @param out.file name of CSV output file for imputed data
-#' @param posterior either "max" or "mean" (default)
-#' @param exclude optional, vector of high density samples to exclude
+#' @param out.prefix prefix for output files
 #' 
 #' @return NULL
 #' 
@@ -22,10 +22,8 @@
 #' @importFrom data.table fwrite
 #' @export
 
-impute_PO <- function(high.file, low.file, low.format="GT", ped.file, out.file, 
-                      posterior="mean", exclude=NULL) {
+impute_PO <- function(high.file, low.file, low.format="GT", ped.file, out.prefix) {
 
-  stopifnot(posterior %in% c("mean","max"))
   stopifnot(low.format %in% c("GT","AD"))
   
   high <- fread(high.file,check.names=F)
@@ -76,18 +74,22 @@ impute_PO <- function(high.file, low.file, low.format="GT", ped.file, out.file,
   imputed <- read.csv("tmp/imputed_postdoseprob.csv",check.names=F,as.is=T)
   cols <- colnames(geno)
   
-  ans <- apply(imputed[,cols],2,function(z,posterior){
+  post.mean <- apply(imputed[,cols],2,function(z){
     u <- strsplit(z,split="|",fixed=T)
     sapply(u,function(x){
       x <- as.numeric(x)
       ploidy <- length(x)-1
-      if (posterior=="mean") {
-        round(sum(x*(0:ploidy)),2)
-      } else {
-        which.max(x)-1
-      }
+      round(sum(x*(0:ploidy)),2)
       })
-    },posterior=posterior)
+    })
+  fwrite(cbind(map,post.mean),file=sub("Q",out.prefix,"Q_post_mean.csv"))
   
-  fwrite(cbind(map,ans),out.file)
+  post.max <- apply(imputed[,cols],2,function(z){
+    u <- strsplit(z,split="|",fixed=T)
+    sapply(u,function(x){
+      which.max(as.numeric(x))-1
+    })
+  })
+  
+  fwrite(cbind(map,post.max),file=sub("Q",out.prefix,"Q_post_max.csv"))
 }

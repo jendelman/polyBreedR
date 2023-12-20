@@ -4,15 +4,7 @@
 \alias{impute_PO}
 \title{Impute from low to high density markers with PolyOrigin}
 \usage{
-impute_PO(
-  high.file,
-  low.file,
-  low.format = "GT",
-  ped.file,
-  out.file,
-  posterior = "mean",
-  exclude = NULL
-)
+impute_PO(high.file, low.file, low.format = "GT", ped.file, out.prefix)
 }
 \arguments{
 \item{high.file}{name of high density file with phased parents}
@@ -23,11 +15,7 @@ impute_PO(
 
 \item{ped.file}{pedigree file for progeny (must follow PO format)}
 
-\item{out.file}{name of CSV output file for imputed data}
-
-\item{posterior}{either "max" or "mean" (default)}
-
-\item{exclude}{optional, vector of high density samples to exclude}
+\item{out.prefix}{prefix for output files}
 }
 \description{
 Impute from low to high density markers by linkage analysis with PolyOrigin
@@ -38,4 +26,6 @@ You must have separately installed PolyOrigin and Julia for this function to wor
 #' The high density file contains phased parental genotypes in PolyOrigin format. The first 3 columns are the genetic map in cM: marker, chrom, position. To output imputed data with physical rather than genetic map positions, including a fourth column named "bp". Subsequent columns are the phased parental genotypes. 
 
 VCF is assumed for the low-density file. The pedigree file must follow PolyOrigin format.
+
+Two output files are generated, corresponding to the posterior maximum and mean genotypes.
 }
