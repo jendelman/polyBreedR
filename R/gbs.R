@@ -18,7 +18,8 @@
 #' @importFrom parallel makeCluster clusterExport parLapply stopCluster
 #' @importFrom stats anova lm chisq.test
 
-gbs <- function(in.file, out.file, ploidy, prior="norm", bias=TRUE, n.core=1) {
+gbs <- function(in.file, out.file, ploidy, prior="norm", 
+                bias=TRUE, n.core=1) {
   
   if (bias) {
     bias_init <- exp(c(-1, -0.5, 0, 0.5, 1))

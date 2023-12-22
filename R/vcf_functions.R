@@ -34,8 +34,6 @@ vcf_prep <- function(vcf.file) {
                     "##INFO=<ID=AB,Number=1,Type=Float,Description=\"Allelic Bias\">",
                     "##INFO=<ID=SE,Number=1,Type=Integer,Description=\"Sequencing Error (PHRED)\">",
                     "##INFO=<ID=OD,Number=1,Type=Integer,Description=\"OverDispersion (PHRED)\">",
-                    "##INFO=<ID=MIN.DP,Number=1,Type=Integer,Description=\"smallest mean DP for GT group\">",
-                    "##INFO=<ID=HWE.P,Number=1,Type=Integer,Description=\"p-value for Hardy-Weinberg Equil (PHRED)\">",
                     "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
                     "##FORMAT=<ID=AD,Number=R,Type=Integer,Description=\"Allele Depth\">",
                     "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Sample Depth\">",

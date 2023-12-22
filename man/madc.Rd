@@ -2,23 +2,21 @@
 % Please edit documentation in R/madc.R
 \name{madc}
 \alias{madc}
-\title{Multi-allelic genotype calls from DArTag}
+\title{Multi-Allelic Haplotype Counts from DArTag}
 \usage{
-madc(madc.file, marker = "CDF1", min.AD = 5)
+madc(madc.file, marker = "CDF1")
 }
 \arguments{
 \item{madc.file}{MADC filename}
 
 \item{marker}{Name of marker ("CDF1" is only option so far)}
-
-\item{min.AD}{minimum AD for discovery}
 }
 \value{
-data frame of counts and diploid GT
+matrix of haplotype counts
 }
 \description{
-Genotype calls from the DArTag MADC (Missing Allele Discovery Count) file
+Multi-Allelic Haplotype Counts from the DArTag MADC (Missing Allele Discovery Count) file
 }
 \details{
-Due to multi-allelism, for some trait markers a correct interpretation is not possible using the collapsed counts file; the MADC file is needed. Currently, the only marker implemented is CDF1 for potato DArTag, which assumes samples are diploid and there are no CDF1.1 homozygotes. The \code{min.AD} parameter establishes the threshold at which an allele is considered present, which is needed to account for sequencing and other errors.
+Due to multi-allelism, for some trait markers a correct interpretation is not possible using the collapsed counts file; the MADC file is needed. Currently, the only marker implemented is CDF1 for potato DArTag. The CDF1 marker detects the 2C, 2T, and 4 alleles, and all other haplotypes are treated as allele 1. Allele 3 is not detected by the assay.
 }
