@@ -23,7 +23,7 @@ Impute from low to high density markers by linkage analysis with PolyOrigin
 \details{
 You must have separately installed PolyOrigin and Julia for this function to work.
 
-#' The high density file contains phased parental genotypes in PolyOrigin format. The first 3 columns are the genetic map in cM: marker, chrom, position. To output imputed data with physical rather than genetic map positions, including a fourth column named "bp". Subsequent columns are the phased parental genotypes. 
+The high density file contains phased parental genotypes in PolyOrigin format. The first 3 columns are the genetic map in cM: marker, chrom, position. To output imputed data with physical rather than genetic map positions, including a fourth column named "bp". Subsequent columns are the phased parental genotypes. 
 
 VCF is assumed for the low-density file. The pedigree file must follow PolyOrigin format.
 
