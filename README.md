@@ -35,7 +35,7 @@ ploidy and parentage. Financial support has come from USDA NIFA Awards
 2014-67013-22434 (AFRI) and 2019-51181-30021 (SCRI).
 
 [Vignette
-3](https://jendelman.github.io/polyBreedR/polyBreedR_Vignette2.html)
+3](https://jendelman.github.io/polyBreedR/polyBreedR_Vignette3.html)
 introduces functions for representing DArTag GBS and SNP array data in
 Variant Call Format, and functions for imputing from low to high density
 markers. Financial support has come from USDA NIFA Awards
