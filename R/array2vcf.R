@@ -21,7 +21,13 @@
 
 array2vcf <- function(array.file, map.file, model.file=NULL, ploidy, vcf.file) {
   
-  con <- file(array.file,open="r")
+  nc <- nchar(array.file)
+  if (substr(array.file,nc-1,nc)==".gz") {
+    con <- gzfile(array.file,open="r")
+  } else {
+    con <- file(array.file,open="r")
+  }
+  
   tmp <- readLines(con,n=1)
   close(con)
   if (tmp=="[Header]") {

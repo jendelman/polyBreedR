@@ -4,18 +4,25 @@
 \alias{impute_PO}
 \title{Impute from low to high density markers with PolyOrigin}
 \usage{
-impute_PO(high.file, low.file, low.format = "GT", ped.file, out.prefix)
+impute_PO(
+  ped.file,
+  high.file,
+  low.file,
+  low.format = "GT",
+  out.file,
+  n.thread = 1
+)
 }
 \arguments{
+\item{ped.file}{pedigree file for progeny (must follow PO format)}
+
 \item{high.file}{name of high density file with phased parents}
 
 \item{low.file}{name of low density VCF file with progeny}
 
 \item{low.format}{either "GT" (default) or "AD"}
 
-\item{ped.file}{pedigree file for progeny (must follow PO format)}
-
-\item{out.prefix}{prefix for output files}
+\item{out.file}{name of CSV output file}
 }
 \description{
 Impute from low to high density markers by linkage analysis with PolyOrigin
@@ -27,5 +34,7 @@ The high density file contains phased parental genotypes in PolyOrigin format. T
 
 VCF is assumed for the low-density file. The pedigree file must follow PolyOrigin format.
 
-Two output files are generated, corresponding to the posterior maximum and mean genotypes.
+The output file contains the posterior maximum geontypes.
+
+A temporary directory "tmp" is created to store intermediate files and then deleted.
 }

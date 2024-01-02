@@ -8,7 +8,7 @@
 #' 
 #' @param counts.file DArTag collapsed counts file
 #' @param dosage.file DArTag dosage file
-#' @param vcf.file name of VCF output file (uncompressed)
+#' @param vcf.file name of VCF output file 
 #' @param ploidy ploidy
 #' @param first.data.row default is 9 for DArTag format
 #' 

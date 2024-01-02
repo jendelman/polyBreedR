@@ -2,7 +2,13 @@ vcf_prep <- function(vcf.file) {
   
   metadata <- character(1000)
   
-  con <- file(vcf.file,"r")
+  nc <- nchar(vcf.file)
+  if (substr(vcf.file,nc-1,nc)==".gz") {
+    con <- gzfile(vcf.file,open="r")
+  } else {
+    con <- file(vcf.file,open="r")
+  }
+  
   temp <- readLines(con,1)
   h <- 0
   while(substr(temp,1,2)=="##") {

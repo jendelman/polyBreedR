@@ -1,3 +1,6 @@
+Changes in 0.37
+* Vignette 3 
+
 Changes in 0.36
 * PolyOrigin option moved to impute_PO
 * GT2DS has multicore option

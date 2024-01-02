@@ -11,7 +11,7 @@ dart2vcf(counts.file, dosage.file, vcf.file, ploidy, first.data.row = 9)
 
 \item{dosage.file}{DArTag dosage file}
 
-\item{vcf.file}{name of VCF output file (uncompressed)}
+\item{vcf.file}{name of VCF output file}
 
 \item{ploidy}{ploidy}
 

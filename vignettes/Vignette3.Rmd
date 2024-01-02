@@ -1,0 +1,150 @@
+---
+title: "polyBreedR Vignette 3: VCF and Marker Imputation"
+author: "Jeff Endelman"
+date: "2023-01-02"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{polyBreedR Vignette3}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE,comment="##",fig.width=5,fig.height=5)
+#knitr::opts_knit$set(root.dir="")
+```
+
+This vignette documents functions developed for the research of Endelman et al. (2024) "Targeted genotyping-by-sequencing of potato and software for imputation" (link coming soon). Please cite this work if you use the software.
+
+## Variant Call Format (VCF)
+
+This vignette illustrates functions for manipulating genome-wide marker data in Variant Call Format ([Danecek et al. 2021](https://doi.org/10.1093/gigascience/giab008)). This vignette assumes some familiarity with the structure of VCF files. 
+
+An attractive feature of VCF is that it contains both genotype calls and the underlying information supporting that call. For genotyping-by-sequencing, the supporting data is the Allele Depth (AD). For microarrays, the supporting data is the normalized signal intensity for the alleles, which is represented as a percentage in the field Allele Intensity (AI) by the polyBreedR function `array2vcf`. This function was designed to convert an Illumina Genome Studio Final Report to VCF. Here is a potato example, which can be contrasted with the approach used in Vignette 1 (written several years before Vignette 3):
+
+```{r}
+library(polyBreedR)
+
+array.file <- system.file("vignette_data", "potato_V3array_XYdata.txt", package = "polyBreedR")
+map.file <- system.file("vignette_data", "potato_V4array.vcf", package = "polyBreedR")
+model.file <- system.file("vignette_data", "potato_V4array_model.csv", package = "polyBreedR")
+
+array2vcf(array.file=array.file, map.file=map.file, model.file=model.file, ploidy=4,
+          vcf.file="potato_example.vcf.gz")
+```
+
+As shown in the above code, `array2vcf` requires a VCF map file, and optionally it takes a model file with parameters for a normal mixture model to make genotype calls.
+
+The [DArTag targeted GBS](https://excellenceinbreeding.org/module3) platform is being utilized for mid-density genotyping in many crops. The function `dart2vcf` generates a VCFv4.3 compliant file from the two standard DArTag CSV files (“Allele_Dose_Report” and “Allele_match_counts_collapsed”). A small DArTag dataset of 85 potato clones is included with polyBreedR to illustrate:
+
+```{r}
+counts.file <- system.file("vignette_data", "DArTag_Allele_match_counts_collapsed.csv", 
+                           package = "polyBreedR")
+dosage.file <- system.file("vignette_data", "DArTag_Allele_Dose_Report.csv", 
+                           package = "polyBreedR")
+
+dart2vcf(counts.file=counts.file, dosage.file=dosage.file, ploidy=4,
+         vcf.file="DArTag.vcf.gz")
+
+gbs(in.file="DArTag.vcf.gz", out.file="DArTag_gbs.vcf.gz", ploidy=4, 
+    n.core=2, silent=TRUE)
+```
+
+The above code illustrates use of the `gbs` function, which replaces the DArT genotype calls with calls based on the R/updog software ([Gerard et al. 2018](https://doi.org/10.1534/genetics.118.301468)), using the "norm" prior. R/updog can account for several departures from the traditional binomial model, including allelic bias and overdispersion, and these parameters are stored in the VCF. 85 samples is potentially too small for robust genotype calling, but in practice you will have at least 384 DArTag samples, since that is the minimum submission.
+
+The `read.vcfR` command in package VCFR is convenient for reading VCF data into R. The command `extrac.gt` can then be used to construct matrices (markers x id) for different genotype fields.
+
+```{r}
+library(vcfR)
+data1 <- read.vcfR("DArTag.vcf.gz")
+tmp <- getFIX(data1)
+map <- data.frame(marker=tmp[,3],
+                  chrom=tmp[,1],
+                  pos=as.integer(tmp[,2]))
+head(map)
+
+GT1 <- extract.gt(data1)
+table(GT1[1,])
+geno1 <- GT2DS(GT1,n.core=2)
+table(geno1[1,])
+```
+
+As shown above, the `GT2DS` function in polyBreedR can be used to convert VCF GT character strings to integer allele dosages (DS). The code below compares the genotype calls between DArT (data1) updog (data2) for the first marker, which were identical except for one sample.
+
+```{r}
+data2 <- read.vcfR("DArTag_gbs.vcf.gz",verbose=F)
+GT2 <- extract.gt(data2)
+geno2 <- GT2DS(GT2,n.core=2)
+table(geno1[1,], geno2[1,])
+```
+
+The `plot_geno` function from the updog package produces nice plots for visualizing the relationship between allele counts and genotype calls. 
+
+```{r}
+AD1 <- extract.gt(data1, element="AD")
+ALT1 <- ADsplit(AD1,ALT=TRUE,n.core=2)
+REF1 <- ADsplit(AD1,ALT=F,n.core=2)
+
+library(updog)
+library(ggplot2)
+
+k = 1 #first marker
+plot_geno(refvec = ALT1[k,], sizevec=ALT1[k,] + REF1[k,],
+          geno=geno1[k,], ploidy=4) + ylab("ALT") + xlab("REF") +
+  ggtitle("DArT")
+```
+
+
+The allelic bias (AB) estimates from updog are stored as INFO in the VCF file and can be retrieved using `extract.info`. When AB = 1, or equivalently logAB=0, there is no bias. Polyploid genotype calls become less reliable as allelic bias increases. 
+
+```{r}
+AB <- extract.info(data2,element="AB",as.numeric=T)
+logAB <- log(AB)/log(2) #base 2 log
+hist(logAB)
+```
+
+
+## Imputation
+
+Missing data arises in GBS datasets when the number of fragments in the reduced genome representation exceeds the total number of reads per sample. This commonly occurs with RAD-seq, which uses restriction enzymes, but is less of an issue with targeted GBS, which use specific primer pairs or oligonucleotide baits.
+
+The polyBreedR function `impute` was designed for datasets where some percentage of the samples for any given marker may be missing. It works with VCF input and output but is not limited to GBS data; array data could also be imputed. Provided at least several hundred samples are present, the Random Forest (RF) method in `impute` is likely to be the most accurate. For more information, consult the help page and this [recorded presentation](https://www.youtube.com/watch?v=QFv0G6szE7A).
+
+For this vignette, the focus is imputing from low- to high-density marker platforms. This situation arises when a lower density platform, such as DArTag, is used for genomic selection candidates, while the training population has been genotype with a higher density platform, like an array or sequence capture. Another application occurs when genotyping platforms are upgraded over time, to include more markers. For example, the original (V1) potato SNP array had 8K markers, and the current one (V4) has 31K.
+
+Two functions were created in polyBreedR for low-to-high imputation. `impute_L2H` uses the Random Forest method based on a training population of individuals genotyped under both platforms. In general, a larger training population leads to better the imputation accuracy. The default behavior is to use the 100 closest markers and 100 classification trees, but these are adjustable parameters. Consult the help page for more details.
+
+The other function, `impute_PO`, uses the [software PolyOrigin](https://github.com/chaozhi/PolyOrigin.jl) to impute markers in the F1 progeny of a partial diallel population based on linkage analysis. To use `impute_PO`, you will need to install Julia and PolyOrigin and prepare for [command line execution](https://julialang.org/downloads/platform/). The high-density marker file for `impute_PO` contains the phased parental genotypes, which can be generated with PolyOrigin. 
+
+To illustrate, the low and high density marker files are provided for a half-diallel population of 85 clones, derived from 5 parents. The high density file contains 10,695 phased SNPs based on array genotyping of their offspring. The low density file contains 1865 DArTag markers with good quantitative agreement with the SNP array (Endelman et al. 2024).
+
+```{r}
+ped.file <- system.file("vignette_data", "diallel_pedigree.csv", 
+                        package = "polyBreedR")
+high.file <- system.file("vignette_data", "diallel_phased_parents.csv", 
+                        package = "polyBreedR")
+low.file <- system.file("vignette_data", "diallel_DArTag.vcf.gz", 
+                        package = "polyBreedR")
+
+impute_PO(ped.file = ped.file, high.file = high.file,
+          low.file = low.file, low.format = "GT", out.file="imputed.csv.gz")
+```
+
+The following code computes the root-mean-squared-error of the imputation.
+
+```{r}
+array.file <- system.file("vignette_data", "diallel_array.vcf.gz", 
+                        package = "polyBreedR")
+array <- read.vcfR(array.file,verbose=F)
+geno.array <- GT2DS(extract.gt(array))
+
+imputed <- read.csv("imputed.csv.gz", check.names=F)
+geno.imputed <- as.matrix(imputed[,-(1:3)]) #remove map
+rownames(geno.imputed) <- imputed$marker
+marks <- intersect(rownames(geno.imputed),rownames(geno.array))
+id <- intersect(colnames(geno.imputed),colnames(geno.array))
+
+#RMSE
+sqrt(mean((geno.imputed[marks,id] - geno.array[marks,id])^2))
+```
+

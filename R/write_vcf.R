@@ -36,7 +36,13 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
   stopifnot(colnames(fixed)==c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"))
   fixed[is.na(fixed)] <- "."
   
-  con <- file(filename,open="w")
+  nc <- nchar(filename)
+  if (substr(filename,nc-1,nc)==".gz") {
+    con <- gzfile(filename,open="w")
+  } else {
+    con <- file(filename,open="w")
+  }
+  
   writeLines(con=con, text="##fileformat=VCFv4.3")
   
   if (!is.null(other.meta))

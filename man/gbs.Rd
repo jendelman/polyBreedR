@@ -4,7 +4,7 @@
 \alias{gbs}
 \title{Genotype calls for GBS}
 \usage{
-gbs(in.file, out.file, ploidy, prior = "norm", bias = TRUE, n.core = 1)
+gbs(in.file, out.file, ploidy, bias = TRUE, n.core = 1, silent = FALSE)
 }
 \arguments{
 \item{in.file}{VCF input file}
@@ -13,18 +13,18 @@ gbs(in.file, out.file, ploidy, prior = "norm", bias = TRUE, n.core = 1)
 
 \item{ploidy}{ploidy}
 
-\item{prior}{model for prior (see Details)}
-
 \item{bias}{TRUE/FALSE, whether to estimate allelic bias}
 
 \item{n.core}{number of cores}
+
+\item{silent}{TRUE/FALSE}
 }
 \value{
-marker x indiv matrix of read depths
+nothing
 }
 \description{
 Genotype calls for genotype-by-sequencing (GBS) data
 }
 \details{
-VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
+VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 }

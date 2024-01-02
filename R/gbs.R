@@ -2,25 +2,26 @@
 #' 
 #' Genotype calls for genotype-by-sequencing (GBS) data
 #' 
-#' VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018). Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
+#' VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 #' 
 #' @param in.file VCF input file
 #' @param out.file VCF output file
 #' @param ploidy ploidy
-#' @param prior model for prior (see Details)
 #' @param bias TRUE/FALSE, whether to estimate allelic bias
 #' @param n.core number of cores
+#' @param silent TRUE/FALSE
 #' 
-#' @return marker x indiv matrix of read depths
+#' @return nothing
 #'
 #' @export
 #' @importFrom updog flexdog
 #' @importFrom parallel makeCluster clusterExport parLapply stopCluster
 #' @importFrom stats anova lm chisq.test
 
-gbs <- function(in.file, out.file, ploidy, prior="norm", 
-                bias=TRUE, n.core=1) {
+gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
+                silent=FALSE) {
   
+  prior <- "norm"
   if (bias) {
     bias_init <- exp(c(-1, -0.5, 0, 0.5, 1))
   } else {
@@ -28,11 +29,22 @@ gbs <- function(in.file, out.file, ploidy, prior="norm",
   }
   prep <- vcf_prep(in.file)
   
-  con.out <- file(out.file,"w")
+  nc <- nchar(out.file)
+  if (substr(out.file,nc-1,nc)==".gz") {
+    con.out <- gzfile(out.file,open="w")
+  } else {
+    con.out <- file(out.file,open="w")
+  }
+  
   for (i in 1:length(prep$new.meta))
     writeLines(con.out,text=prep$new.meta[i])
   
-  con.in <- file(in.file,"r")
+  nc <- nchar(in.file)
+  if (substr(in.file,nc-1,nc)==".gz") {
+    con.in <- gzfile(in.file,open="r")
+  } else {
+    con.in <- file(in.file,open="r")
+  }
   tmp <- readLines(con.in,n=prep$old.meta)
   
   if (n.core > 1) {
@@ -97,7 +109,8 @@ gbs <- function(in.file, out.file, ploidy, prior="norm",
   for (i in 1:nb) {
     tmp <- readLines(con.in,block.size)
     m <- length(tmp)
-    cat(sub("X",(i-1)*block.size + m,"Progress: X markers\n"))
+    if (!silent)
+      cat(sub("X",(i-1)*block.size + m,"Progress: X markers\n"))
     tmp2 <- strsplit(tmp,split="\t",fixed=T)
     x <- lapply(tmp2,function(x){vcf_extract(x[-(1:8)],"AD")})
     if (n.core > 1) {
