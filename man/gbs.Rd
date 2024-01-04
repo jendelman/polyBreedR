@@ -26,5 +26,7 @@ nothing
 Genotype calls for genotype-by-sequencing (GBS) data
 }
 \details{
-VCF input file must contain AD field. Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
+VCF input file must contain AD field. Variants with more than 2 alleles are coerced to zero DP, so better to filter them out first.
+
+Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 }
