@@ -3,7 +3,7 @@ vcf_prep <- function(vcf.file) {
   metadata <- character(1000)
   
   nc <- nchar(vcf.file)
-  if (substr(vcf.file,nc-1,nc)==".gz") {
+  if (substr(vcf.file,nc-2,nc)==".gz") {
     con <- gzfile(vcf.file,open="r")
   } else {
     con <- file(vcf.file,open="r")

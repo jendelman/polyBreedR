@@ -30,7 +30,7 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
   prep <- vcf_prep(in.file)
   
   nc <- nchar(out.file)
-  if (substr(out.file,nc-1,nc)==".gz") {
+  if (substr(out.file,nc-2,nc)==".gz") {
     con.out <- gzfile(out.file,open="w")
   } else {
     con.out <- file(out.file,open="w")
@@ -40,7 +40,7 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
     writeLines(con.out,text=prep$new.meta[i])
   
   nc <- nchar(in.file)
-  if (substr(in.file,nc-1,nc)==".gz") {
+  if (substr(in.file,nc-2,nc)==".gz") {
     con.in <- gzfile(in.file,open="r")
   } else {
     con.in <- file(in.file,open="r")

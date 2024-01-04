@@ -37,7 +37,7 @@ write_vcf <- function(filename, fixed, geno, other.meta=NULL) {
   fixed[is.na(fixed)] <- "."
   
   nc <- nchar(filename)
-  if (substr(filename,nc-1,nc)==".gz") {
+  if (substr(filename,nc-2,nc)==".gz") {
     con <- gzfile(filename,open="w")
   } else {
     con <- file(filename,open="w")

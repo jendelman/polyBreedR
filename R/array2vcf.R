@@ -22,7 +22,7 @@
 array2vcf <- function(array.file, map.file, model.file=NULL, ploidy, vcf.file) {
   
   nc <- nchar(array.file)
-  if (substr(array.file,nc-1,nc)==".gz") {
+  if (substr(array.file,nc-2,nc)==".gz") {
     con <- gzfile(array.file,open="r")
   } else {
     con <- file(array.file,open="r")
