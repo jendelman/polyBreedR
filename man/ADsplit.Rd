@@ -19,3 +19,6 @@ integer data with same dimensions as AD
 \description{
 Extract read counts from AD string
 }
+\details{
+Only valid for a single ALT allele.
+}

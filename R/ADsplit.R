@@ -2,6 +2,8 @@
 #' 
 #' Extract read counts from AD string
 #' 
+#' Only valid for a single ALT allele. 
+#' 
 #' @param AD array of AD strings
 #' @param ALT TRUE or FALSE (= REF)
 #' @param n.core number of cores
@@ -16,7 +18,14 @@ ADsplit <- function(AD, ALT, n.core=1) {
   
   f <- function(AD,k) {
     x <- strsplit(AD,split=",",fixed=T)
-    as.integer(sapply(x,"[[",k))
+    m <- length(x)
+    out <- integer(m)
+    ok <- which(sapply(x,length)==2)
+    out[ok] <- as.integer(sapply(x[ok],"[[",k))
+    missing <- which(is.na(out))
+    if (length(missing)>0)
+      out[missing] <- 0
+    return(out)
   }
   
   k <- as.integer(ALT)+1
