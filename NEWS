@@ -1,3 +1,6 @@
+Changes in 0.38
+* Added chunk.size option to gbs
+
 Changes in 0.37
 * Vignette 3 
 

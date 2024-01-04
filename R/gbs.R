@@ -6,11 +6,14 @@
 #'
 #' Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 #' 
+#' The input file is processed in chunks of size \code{chunk.size}.
+#' 
 #' @param in.file VCF input file
 #' @param out.file VCF output file
 #' @param ploidy ploidy
 #' @param bias TRUE/FALSE, whether to estimate allelic bias
 #' @param n.core number of cores
+#' @param chunk.size number of variants to process at a time
 #' @param silent TRUE/FALSE
 #' 
 #' @return nothing
@@ -21,7 +24,10 @@
 #' @importFrom stats anova lm chisq.test
 
 gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
-                silent=FALSE) {
+                chunk.size=1000, silent=FALSE) {
+  
+  chunk.size <- as.integer(chunk.size)
+  stopifnot(chunk.size > 0)
   
   prior <- "norm"
   if (bias) {
@@ -106,14 +112,13 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
     return(paste(c(info,"GT:AD:DP:DS:GQ",z),collapse="\t"))
   }
 
-  block.size <- 100
-  nb <- prep$n.mark %/% block.size+1
+  nb <- prep$n.mark %/% chunk.size+1
   i=1
   for (i in 1:nb) {
-    tmp <- readLines(con.in,block.size)
+    tmp <- readLines(con.in,chunk.size)
     m <- length(tmp)
     if (!silent)
-      cat(sub("X",(i-1)*block.size + m,"Progress: X markers\n"))
+      cat(sub("X",(i-1)*chunk.size + m,"Progress: X markers\n"))
     tmp2 <- strsplit(tmp,split="\t",fixed=T)
     x <- lapply(tmp2,function(x){vcf_extract(x[-(1:8)],"AD")})
     if (n.core > 1) {

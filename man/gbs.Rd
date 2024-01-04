@@ -4,7 +4,15 @@
 \alias{gbs}
 \title{Genotype calls for GBS}
 \usage{
-gbs(in.file, out.file, ploidy, bias = TRUE, n.core = 1, silent = FALSE)
+gbs(
+  in.file,
+  out.file,
+  ploidy,
+  bias = TRUE,
+  n.core = 1,
+  chunk.size = 1000,
+  silent = FALSE
+)
 }
 \arguments{
 \item{in.file}{VCF input file}
@@ -16,6 +24,8 @@ gbs(in.file, out.file, ploidy, bias = TRUE, n.core = 1, silent = FALSE)
 \item{bias}{TRUE/FALSE, whether to estimate allelic bias}
 
 \item{n.core}{number of cores}
+
+\item{chunk.size}{number of variants to process at a time}
 
 \item{silent}{TRUE/FALSE}
 }
@@ -29,4 +39,6 @@ Genotype calls for genotype-by-sequencing (GBS) data
 VCF input file must contain AD field. Variants with more than 2 alleles are coerced to zero DP, so better to filter them out first.
 
 Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
+
+The input file is processed in chunks of size \code{chunk.size}.
 }
