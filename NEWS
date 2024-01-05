@@ -1,5 +1,6 @@
 Changes in 0.38
 * Added chunk.size option to gbs
+* exception handling in impute_L2H
 
 Changes in 0.37
 * Vignette 3 

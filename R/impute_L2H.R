@@ -50,19 +50,29 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
       if (length(unique(y))==1) {
         return(list(pred=rep(y[1],ntest), error=rep(0,params$n.tree)))
       } else {
-        ans <- randomForest(y=factor(y), x=geno[train.id,data$pred,drop=FALSE],
+        if (is.null(data$pred)) {
+          imp <- as.integer(names(which.max(table(y))))
+          return(list(pred=rep(imp,ntest), error=rep(as.numeric(NA),params$n.tree)))
+        } else {
+          ans <- randomForest(y=factor(y), x=geno[train.id,data$pred,drop=FALSE],
                             xtest=geno[pred.id,data$pred,drop=FALSE],
                             ntree=params$n.tree)
-        return(list(pred=ans$test$predicted, error=ans$err.rate[,1]))
+          return(list(pred=as.integer(as.character(ans$test$predicted)), error=ans$err.rate[,1]))
+        }
       }
     } else {
       if (sd(y)==0) {
         return(list(pred=rep(y[1],ntest), error=rep(0,params$n.tree)))
       } else {
-        ans <- suppressWarnings(randomForest(y=y, x=geno[train.id,data$pred,drop=FALSE],
+        if (is.null(data$pred)) {
+          imp <- mean(y,na.rm=T)
+          return(list(pred=rep(imp,ntest), error=rep(as.numeric(NA),params$n.tree)))
+        } else {
+          ans <- suppressWarnings(randomForest(y=y, x=geno[train.id,data$pred,drop=FALSE],
                                              xtest=geno[pred.id,data$pred,drop=FALSE],
                                              ntree=params$n.tree))
-        return(list(pred=ans$test$predicted, error=ans$mse))
+          return(list(pred=ans$test$predicted, error=ans$mse))
+        }
       }
     }
   }
@@ -164,10 +174,14 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   for (i in 1:m1) {
     ix <- which(map2$chrom==map1$chrom[i])
     zz <- min(params$n.mark,length(ix))
-    data[[i]] <- list(y=geno1[,i],
+    if (zz > 0) {
+      data[[i]] <- list(y=geno1[,i],
                  pred=map2$marker[ix[order(abs(map2$pos[ix]-map1$pos[i]))[1:zz]]])
+    } else {
+      data[[i]] <- list(y=geno1[,i], pred=NULL)
+    }
   }
-    
+  
   if (n.core > 1) {
     tmp <- parLapply(cl, X=data, fun=impute.RF, geno=geno2, train.id, pred.id, params)
   } else {
