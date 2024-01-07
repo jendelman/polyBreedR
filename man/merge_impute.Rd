@@ -2,7 +2,7 @@
 % Please edit documentation in R/merge_impute.R
 \name{merge_impute}
 \alias{merge_impute}
-\title{Merge two genotype matrices and impute missing data}
+\title{Merge two genotype matrices and impute missing data (deprecated)}
 \usage{
 merge_impute(geno1, geno2, ploidy)
 }
@@ -20,6 +20,8 @@ Imputed genotype matrix (markers x indiv)
 Merge two genotype matrices and impute missing data by BLUP
 }
 \details{
+This function is obsolete. Use \code{\link{impute_L2H}} instead.
+
 Designed to impute from low to high density markers. The BLUP method is equivalent to Eq. 4 of Poland et al. (2012), but this function is not iterative. Additional shrinkage toward the mean is applied if needed to keep the imputed values within the range [0,\code{ploidy}]. Missing data in the input matrices are imputed with the population mean for each marker. If an individual appears in both input matrices, it is renamed with suffixes ".1" and ".2" and treated as two different individuals. Monomorphic markers are removed.
 }
 \references{

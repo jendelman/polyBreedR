@@ -1,6 +1,8 @@
-#' Merge two genotype matrices and impute missing data
+#' Merge two genotype matrices and impute missing data (deprecated)
 #' 
 #' Merge two genotype matrices and impute missing data by BLUP
+#' 
+#' This function is obsolete. Use \code{\link{impute_L2H}} instead.
 #' 
 #' Designed to impute from low to high density markers. The BLUP method is equivalent to Eq. 4 of Poland et al. (2012), but this function is not iterative. Additional shrinkage toward the mean is applied if needed to keep the imputed values within the range [0,\code{ploidy}]. Missing data in the input matrices are imputed with the population mean for each marker. If an individual appears in both input matrices, it is renamed with suffixes ".1" and ".2" and treated as two different individuals. Monomorphic markers are removed.
 #' 
@@ -17,6 +19,7 @@
 
 merge_impute <- function(geno1,geno2,ploidy) {
   
+  warning("This function is obsolete and included only for legacy reasons. Use impute_L2H instead.")
   mBLUP <- function(b,W1.L,W1.H_L,V12.L,mu2) {
     W1.H_L[is.na(W1.H_L)] <- 0 
     W1.H <- cbind(W1.L,W1.H_L)
