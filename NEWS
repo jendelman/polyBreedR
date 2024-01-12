@@ -1,3 +1,6 @@
+Changes in 0.39
+* Changed impute_PO to impute_LA to allow for other methods eventually (MAPpoly)
+
 Changes in 0.38
 * Added chunk.size option to gbs
 * exception handling in impute_L2H

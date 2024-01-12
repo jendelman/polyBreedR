@@ -1,20 +1,20 @@
-#' Impute from low to high density markers with PolyOrigin
+#' Impute from low to high density markers by Linkage Analysis (LA)
 #' 
-#' Impute from low to high density markers by linkage analysis with PolyOrigin
+#' Impute from low to high density markers by Linkage Analysis 
 #' 
 #' You must have separately installed PolyOrigin and Julia for this function to work.
 #'
-#' The high density file contains phased parental genotypes in PolyOrigin format. The first 3 columns are the genetic map in cM: marker, chrom, position. To output imputed data with physical rather than genetic map positions, including a fourth column named "bp". Subsequent columns are the phased parental genotypes. 
+#' The high density file contains phased parental genotypes using 0|1 format. The first 3 columns are the genetic map in cM: marker, chrom, position. To output imputed data with physical rather than genetic map positions, including a fourth column named "bp". Subsequent columns are the phased parental genotypes. 
 #' 
-#' VCF is assumed for the low-density file. The pedigree file must follow PolyOrigin format.
+#' VCF is assumed for the low-density file. The pedigree file has four columns: id, pop, mother, father, ploidy.
 #' 
-#' The output file contains the posterior maximum geontypes.
+#' The output file contains the posterior maximum genotypes.
 #'
 #' A temporary directory "tmp" is created to store intermediate files and then deleted.
 #' 
-#' @param ped.file pedigree file for progeny (must follow PO format)
-#' @param high.file name of high density file with phased parents
-#' @param low.file name of low density VCF file with progeny
+#' @param ped.file pedigree file for progeny
+#' @param high.file name of file with phased parental genotypes
+#' @param low.file name of VCF file with progeny
 #' @param low.format either "GT" (default) or "AD"
 #' @param out.file name of CSV output file
 #' 
@@ -24,7 +24,7 @@
 #' @importFrom data.table fwrite fread
 #' @export
 
-impute_PO <- function(ped.file, high.file, low.file, low.format="GT",
+impute_LA <- function(ped.file, high.file, low.file, low.format="GT",
                       out.file, n.thread=1) {
 
   stopifnot(low.format %in% c("GT","AD"))
@@ -57,7 +57,13 @@ impute_PO <- function(ped.file, high.file, low.file, low.format="GT",
   colnames(high) <- replace(colnames(high),1:3,c("marker","chrom","pos"))
   colnames(map) <- c("marker","chrom","pos")
   geno <- geno[rownames(geno) %in% high$marker,] 
-    
+  
+  #For PO, change from 0|1 to 1|2
+  f1 <- function(x){
+    gsub("0","1",gsub("1","2",x))
+  }
+  high <- cbind(high[,1:3],apply(high[,4:ncol(high),drop=F],2,f1))
+  
   combo <- merge(high,data.frame(marker=rownames(geno),geno,check.names = F),
                  by="marker",all.x=T)
   combo <- combo[match(map$marker,combo$marker),]

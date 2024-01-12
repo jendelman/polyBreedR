@@ -69,7 +69,7 @@ geno1 <- GT2DS(GT1,n.core=2)
 table(geno1[1,])
 ```
 
-As shown above, the `GT2DS` function in polyBreedR can be used to convert VCF GT character strings to integer allele dosages (DS). The code below compares the genotype calls between DArT (data1) updog (data2) for the first marker, which were identical except for one sample.
+As shown above, the `GT2DS` function in polyBreedR can be used to convert VCF GT character strings to integer allele dosages (DS). The code below compares the genotype calls between DArT (data1) and updog (data2) for the first marker, which were identical except for one sample.
 
 ```{r}
 data2 <- read.vcfR("DArTag_gbs.vcf.gz",verbose=F)
@@ -112,9 +112,9 @@ The polyBreedR function `impute` was designed for datasets where some percentage
 
 For this vignette, the focus is imputing from low- to high-density marker platforms. This situation arises when a lower density platform, such as DArTag, is used for genomic selection candidates, while the training population has been genotype with a higher density platform, like an array or sequence capture. Another application occurs when genotyping platforms are upgraded over time, to include more markers. For example, the original (V1) potato SNP array had 8K markers, and the current one (V4) has 31K.
 
-Two functions were created in polyBreedR for low-to-high imputation. `impute_L2H` uses the Random Forest method based on a training population of individuals genotyped under both platforms. In general, a larger training population leads to better the imputation accuracy. The default behavior is to use the 100 closest markers and 100 classification trees, but these are adjustable parameters. Consult the help page for more details.
+Two functions were created in polyBreedR for low-to-high imputation. `impute_L2H` uses the Random Forest method based on a training population of individuals genotyped under both platforms. In general, a larger training population leads to better the imputation accuracy. The default behavior is to use the 200 closest markers and 100 classification trees, but these are adjustable parameters. Consult the help page for more details.
 
-The other function, `impute_PO`, uses the [software PolyOrigin](https://github.com/chaozhi/PolyOrigin.jl) to impute markers in the F1 progeny of a partial diallel population based on linkage analysis. To use `impute_PO`, you will need to install Julia and PolyOrigin and prepare for [command line execution](https://julialang.org/downloads/platform/). The high-density marker file for `impute_PO` contains the phased parental genotypes, which can be generated with PolyOrigin. 
+The other function, `impute_LA`, was designed to impute markers in F1 populations based on linkage analysis (LA). The current implementation requires the [software PolyOrigin](https://github.com/chaozhi/PolyOrigin.jl), for which you will need to install Julia and PolyOrigin separately and prepare for [command line execution](https://julialang.org/downloads/platform/). For `impute_LA`, the high-density marker file contains the phased parental genotypes in 0|1 format. 
 
 To illustrate, the low and high density marker files are provided for a half-diallel population of 85 clones, derived from 5 parents. The high density file contains 10,695 phased SNPs based on array genotyping of their offspring. The low density file contains 1865 DArTag markers with good quantitative agreement with the SNP array (Endelman et al. 2024).
 
@@ -126,7 +126,13 @@ high.file <- system.file("vignette_data", "diallel_phased_parents.csv",
 low.file <- system.file("vignette_data", "diallel_DArTag.vcf.gz", 
                         package = "polyBreedR")
 
-impute_PO(ped.file = ped.file, high.file = high.file,
+#peek at phased parental genotype file
+head(read.csv(high.file, check.names=F))
+
+#peek at pedigree file
+read.csv(ped.file, check.names=F)[1:8,]
+
+impute_LA(ped.file = ped.file, high.file = high.file,
           low.file = low.file, low.format = "GT", out.file="imputed.csv.gz")
 ```
 
