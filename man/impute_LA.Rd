@@ -4,14 +4,7 @@
 \alias{impute_LA}
 \title{Impute from low to high density markers by Linkage Analysis (LA)}
 \usage{
-impute_LA(
-  ped.file,
-  high.file,
-  low.file,
-  low.format = "GT",
-  out.file,
-  n.thread = 1
-)
+impute_LA(ped.file, high.file, low.file, low.format = "GT", out.file)
 }
 \arguments{
 \item{ped.file}{pedigree file for progeny}

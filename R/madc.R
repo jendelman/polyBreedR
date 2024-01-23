@@ -1,23 +1,28 @@
-#' Multi-Allelic Haplotype Counts from DArTag
+#' Multi-Allelic Haplotype Counts for potato DArTag
 #' 
-#' Multi-Allelic Haplotype Counts from the DArTag MADC (Missing Allele Discovery Count) file
+#' Multi-Allelic Haplotype Counts for potato DArTag 
 #' 
-#' Due to multi-allelism, for some trait markers a correct interpretation is not possible using the collapsed counts file; the MADC file is needed. Currently, the only marker implemented is CDF1 for potato DArTag. The CDF1 marker detects the 2C, 2T, and 4 alleles, and all other haplotypes are treated as allele 1. Allele 3 is not detected by the assay. 
+#' Due to multi-allelism, for some trait markers a correct interpretation is not possible using the collapsed counts file; the MADC (Missing Allele Discovery Count) file is needed.
+#' 
+#' "CDF1" uses marker CDF1.4_chr05_4488021 to detect the 2C, 2T, and 4 alleles; all other haplotypes are treated as allele 1. Allele 3 is not detected by the assay. 
+#' 
+#' "OFP20" relies on three markers. Marker OFP20_M6_CDS_994 detects OFP20.1 as Alt and most other haplotypes as Ref, but some alleles appear to be NULL. Marker OFP20_M6_CDS_171 detects allele 2 as Alt and alleles 3 and 7 as Ref; other alleles are NULL. Marker OFP20_M6_CDS_24 detects allele 8 as Ref and most other alleles as Alt. Given the high allelic diversity at this locus, this function may not work in all germplasm groups.
 #' 
 #' @param madc.file MADC filename
-#' @param marker Name of marker ("CDF1" is only option so far)
+#' @param marker Name of marker ("CDF1","OFP20")
 #'
 #' @return matrix of haplotype counts
 #' @export
 #' @importFrom data.table fread
 
-madc <- function(madc.file, marker="CDF1") {
+madc <- function(madc.file, marker) {
+
+  data <- fread(madc.file,skip=7)
+  tmp <- as.matrix(data[,17:ncol(data)])
+  id <- colnames(tmp)
+  n <- length(id)
   
   if (toupper(marker)=="CDF1") {
-    data <- fread(madc.file,skip=7)
-    tmp <- as.matrix(data[,17:ncol(data)])
-    id <- colnames(tmp)
-    n <- length(id)
     counts <- matrix(0,ncol=4,nrow=n,
                 dimnames=list(id,c("CDF1.1","CDF1.2T","CDF1.2C","CDF1.4")))
     k <- which(data$AlleleID=="CDF1.4_chr05_4488021|Ref")
@@ -52,5 +57,22 @@ madc <- function(madc.file, marker="CDF1") {
     # })
     
     return(counts)
+  }
+  
+  if (toupper(marker)=="OFP20") {
+    x <- c("OFP20_M6_CDS_994|Ref","OFP20_M6_CDS_994|Alt","OFP20_M6_CDS_24|Ref","OFP20_M6_CDS_24|Alt","OFP20_M6_CDS_171|RefMatch","OFP20_M6_CDS_171|AltMatch")
+    ix <- match(x,data$AlleleID)
+    data2 <- t(tmp[ix,])
+    dimnames(data2) <- list(colnames(tmp),data$AlleleID[ix])
+    AF1 <- round(data2[,2]/apply(data2[,1:2],1,sum),2)
+    AF8 <- round(data2[,3]/apply(data2[,3:4],1,sum),2)
+    data3 <- data.frame(id=rownames(data2),
+                        AF1=AF1,
+                        AF8=AF8,
+                        AD2=data2[,6],
+                        'AD3&7'=data2[,5],check.names=F)
+                        #AD8=data2[,1])
+    rownames(data3) <- NULL
+    return(data3)      
   }
 }

@@ -25,7 +25,7 @@
 #' @export
 
 impute_LA <- function(ped.file, high.file, low.file, low.format="GT",
-                      out.file, n.thread=1) {
+                      out.file) {
 
   stopifnot(low.format %in% c("GT","AD"))
   
