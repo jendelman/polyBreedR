@@ -17,8 +17,15 @@
 
 madc <- function(madc.file, marker) {
 
-  data <- fread(madc.file,skip=7)
-  tmp <- as.matrix(data[,17:ncol(data)])
+  con <- file(madc.file,open="r")
+  tmp <- readLines(con,n=10)
+  first.row <- grep("AlleleID",tmp)
+  ik <- which(strsplit(tmp[1],split=",")[[1]]!="*")
+  first.col <- min(ik)
+  close(con)
+  
+  data <- fread(madc.file,skip=first.row-1)
+  tmp <- as.matrix(data[,first.col:ncol(data)])
   id <- colnames(tmp)
   n <- length(id)
   
