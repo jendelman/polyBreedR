@@ -6,6 +6,8 @@
 #'
 #' Posterior mode and mean genotypes are added as GT and DS fields. GQ is also added based on probability of posterior mode. Binomial calculation uses R/updog package (Gerard et al. 2018) with "norm" prior. Previous INFO is discarded; adds NS, DP.AVG, AF.GT, AB, OD, SE.
 #' 
+#' When model.fit is FALSE, the software uses AB, OD, and SE parameters from INFO.
+#' 
 #' The input file is processed in chunks of size \code{chunk.size}.
 #' 
 #' @param in.file VCF input file
@@ -15,6 +17,7 @@
 #' @param n.core number of cores
 #' @param chunk.size number of variants to process at a time
 #' @param silent TRUE/FALSE
+#' @param model.fit TRUE/FALSE
 #' 
 #' @return nothing
 #'
@@ -24,7 +27,7 @@
 #' @importFrom stats anova lm chisq.test
 
 gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
-                chunk.size=1000, silent=FALSE) {
+                chunk.size=1000, silent=FALSE, model.fit=TRUE) {
   
   chunk.size <- as.integer(chunk.size)
   stopifnot(chunk.size > 0)
@@ -60,7 +63,20 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
     clusterExport(cl=cl,varlist=NULL)
   }
   
-  f1 <- function(AD,ploidy,prior) {
+  f1 <- function(u,ploidy,prior,model.fit) {
+    if (!model.fit) {
+      AD <- u[-1]
+      if ((regexpr("AB",u[1]) > 0)&(regexpr("OD",u[1]) > 0)&(regexpr("SE",u[1]) > 0)) {
+        params <- strsplit(u[1],split=";")[[1]]
+        OD <- 10^(-as.numeric(sub("OD=","",params[grep("OD",params)]))/10)
+        SE <- 10^(-as.numeric(sub("SE=","",params[grep("SE",params)]))/10)
+        AB <- as.numeric(sub("AB=","",params[grep("AB",params)]))
+      } else {
+        return(paste(c(u[1],"AD",u[-1]),collapse="\t"))
+      }
+    } else {
+      AD <- u
+    }
     x2 <- strsplit(AD,split=",",fixed=T)
     m <- length(x2)
     ref <- alt <- integer(m)
@@ -77,9 +93,16 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
     DP.AVG <- paste("DP.AVG",round(mean(DP),1),sep="=")
     
     n <- length(alt)
-    tmp <- try(flexdog(refvec=alt,sizevec=alt+ref,
+    if (!model.fit) {
+      tmp <- try(flexdog(refvec=alt,sizevec=alt+ref,
+                         ploidy=ploidy,model=prior,bias_init=AB,seq=SE,od=OD,
+                         verbose=FALSE,update_bias=FALSE,update_seq=FALSE,
+                         update_od=FALSE),silent=TRUE)
+    } else { 
+      tmp <- try(flexdog(refvec=alt,sizevec=alt+ref,
                        ploidy=ploidy,model=prior,bias_init=bias_init,
                        verbose=FALSE,update_bias=bias),silent=TRUE)
+    }
     if (!inherits(tmp,"try-error")) {
       AF <- mean(tmp$geno,na.rm=T)/ploidy
       AF.GT <- paste("AF.GT",round(AF,3),sep="=")
@@ -121,10 +144,14 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
       cat(sub("X",(i-1)*chunk.size + m,"Progress: X markers\n"))
     tmp2 <- strsplit(tmp,split="\t",fixed=T)
     x <- lapply(tmp2,function(x){vcf_extract(x[-(1:8)],"AD")})
+    if (!model.fit) {
+      info <- lapply(tmp2,"[[",8)
+      x <- mapply(FUN=function(x,y){c(x,y)},x=info,y=x,SIMPLIFY=FALSE)
+    }
     if (n.core > 1) {
-      ans <- parLapply(cl=cl,X=x,f1,ploidy=ploidy,prior=prior)
+      ans <- parLapply(cl=cl,X=x,f1,ploidy=ploidy,prior=prior,model.fit=model.fit)
     } else {
-      ans <- lapply(x,f1,ploidy=ploidy,prior=prior)
+      ans <- lapply(x,f1,ploidy=ploidy,prior=prior,model.fit=model.fit)
     }
     for (j in 1:length(ans)) {
       writeLines(con.out,text=paste(c(tmp2[[j]][1:7],ans[[j]]),collapse="\t"))

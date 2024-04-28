@@ -11,7 +11,7 @@ vignette: >
 
 ```{r include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE,comment="##",fig.width=5,fig.height=5)
-#knitr::opts_knit$set(root.dir="")
+knitr::opts_knit$set(root.dir="~/Software/polyBreedR/vignettes/")
 ```
 
 This vignette documents functions developed for the research of Endelman et al. (2024) "Targeted genotyping-by-sequencing of potato and software for imputation" (link coming soon). Please cite this work if you use the software.
@@ -50,7 +50,7 @@ gbs(in.file="DArTag.vcf.gz", out.file="DArTag_gbs.vcf.gz", ploidy=4,
     n.core=2, silent=TRUE)
 ```
 
-The above code illustrates use of the `gbs` function, which replaces the DArT genotype calls with calls based on the R/updog software ([Gerard et al. 2018](https://doi.org/10.1534/genetics.118.301468)), using the "norm" prior. R/updog can account for several departures from the traditional binomial model, including allelic bias and overdispersion, and these parameters are stored in the VCF. 85 samples is potentially too small for robust genotype calling, but in practice you will have at least 384 DArTag samples, since that is the minimum submission.
+The above code illustrates using the `gbs` function to replace DArT genotype calls with calls based on the R/updog software ([Gerard et al. 2018](https://doi.org/10.1534/genetics.118.301468)), using the "norm" prior. R/updog can account for several departures from the traditional binomial model, including allelic bias and overdispersion, and these parameters are stored in the VCF. There may be situations when you want to apply the updog model generated with a previous dataset to new samples. After you import the model parameters from the INFO field of the old VCF file to the new file (e.g., using bcftools annotate), run the `gbs` function using option "model.fit=FALSE". This is illustrated in the supplemental file of the publication. 
 
 The `read.vcfR` command in package VCFR is convenient for reading VCF data into R. The command `extrac.gt` can then be used to construct matrices (markers x id) for different genotype fields.
 

@@ -2,14 +2,18 @@
 % Please edit documentation in R/check_ploidy.R
 \name{check_ploidy}
 \alias{check_ploidy}
-\title{Check ploidy}
+\title{Check ploidy for tetraploids}
 \usage{
-check_ploidy(geno, map)
+check_ploidy(geno = NULL, map = NULL, vcf.file = NULL, max.missing = 0.1)
 }
 \arguments{
 \item{geno}{Genotype matrix (markers x indiv)}
 
 \item{map}{Data frame with marker map (Marker, Chrom, Position)}
+
+\item{vcf.file}{VCF file input}
+
+\item{max.missing}{maximum proportion of missing data allowed per marker}
 }
 \value{
 List containing
@@ -23,4 +27,6 @@ Fraction of simplex or triplex markers
 }
 \details{
 For every indiv in the genotype matrix, the fraction of markers per chromosome called as simplex or triplex is calculated, which should be low for diploids. A small amount of missing genotype data can be tolerated.
+
+As of v4.2, a VCF file can be used as input instead
 }

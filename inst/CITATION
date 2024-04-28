@@ -1,0 +1,11 @@
+citHeader("To cite the polyBreedR package in publications, please use")
+
+citEntry(entry="Article",
+	title="Targeted genotyping-by-sequencing of potato and data analysis with R/polyBreedR",
+	author=as.person("Endelman et al."),
+	year=2024,
+	journal="bioRxiv",
+	volume="",
+    pages="",	
+    textVersion="Endelman et al. (2024) Targeted genotyping-by-sequencing of potato and data analysis with R/polyBreedR."
+)

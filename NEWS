@@ -1,3 +1,7 @@
+Changes in 0.42
+* new option "model.fit" in gbs function 
+* check_ploidy accepts VCF input
+
 Changes in 0.41
 * Generalized data input for madc
 

@@ -73,13 +73,11 @@ madc <- function(madc.file, marker) {
     dimnames(data2) <- list(colnames(tmp),data$AlleleID[ix])
     AF1 <- round(data2[,2]/apply(data2[,1:2],1,sum),2)
     AF8 <- round(data2[,3]/apply(data2[,3:4],1,sum),2)
-    data3 <- data.frame(id=rownames(data2),
-                        AF1=AF1,
-                        AF8=AF8,
-                        AD2=data2[,6],
-                        'AD3&7'=data2[,5],check.names=F)
-                        #AD8=data2[,1])
-    rownames(data3) <- NULL
+    data3 <- cbind(AF1=AF1,
+                    AF8=AF8,
+                    AD2=data2[,6],
+                   'AD3&7'=data2[,5])
+    rownames(data3) <- rownames(data2)
     return(data3)      
   }
 }
