@@ -1,3 +1,6 @@
+Changes in 0.43
+* impute_L2H was missing mean/mode imputation for CSV input
+
 Changes in 0.42
 * new option "model.fit" in gbs function 
 * check_ploidy accepts VCF input

@@ -111,8 +111,11 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
     map1 <- high[,1:3]
     colnames(map1) <- c("marker","chrom","pos")
     geno1 <- t(as.matrix(high[,-(1:3)]))
-    if (params$format=="GT")
-      geno1 <- apply(geno1,2,as.integer)
+    if (params$format=="GT") {
+      geno1 <- apply(geno1,2,function(z){impute.mode(as.integer(z))})
+    } else {
+      geno1 <- apply(geno1,2,impute.mean)
+    }
     dimnames(geno1) <- list(colnames(high)[-(1:3)],map1$marker)
   }
   if ("exclude" %in% np) {
@@ -144,8 +147,11 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
     map2 <- low[,1:3]
     colnames(map2) <- c("marker","chrom","pos")
     geno2 <- t(as.matrix(low[,-(1:3)]))
-    if (params$format=="GT")
-      geno2 <- apply(geno2,2,as.integer)
+    if (params$format=="GT") {
+      geno2 <- apply(geno2,2,function(z){impute.mode(as.integer(z))})
+    } else {
+      geno2 <- apply(geno2,2,impute.mean)
+    }
     dimnames(geno2) <- list(colnames(low)[-(1:3)],map2$marker)
   }
   
