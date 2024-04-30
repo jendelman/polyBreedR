@@ -33,7 +33,7 @@ matrix of OOB error with dimensions markers x trees
 Impute from low to high density markers by Random Forest
 }
 \details{
-Argument \code{params} is a list with three named elements: format, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). Classification trees are used for GT and regression trees for DS. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 200), chosen based on minimum distance to the target. 
+Argument \code{params} is a list with three named elements: format, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). Classification trees are used for GT and regression trees for DS. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. 
 
 The \code{exclude} argument is useful for cross-validation. 
 

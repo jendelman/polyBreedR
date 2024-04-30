@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE,comment="##",fig.w
 knitr::opts_knit$set(root.dir="~/Software/polyBreedR/vignettes/")
 ```
 
-This vignette documents functions developed for the research of Endelman et al. (2024) "Targeted genotyping-by-sequencing of potato and software for imputation" (link coming soon). Please cite this work if you use the software.
+This vignette documents functions developed for the research of [Endelman et al. (2024)](https://doi.org/10.1101/2024.02.12.579978) "Targeted genotyping-by-sequencing of potato and data analysis with R/polyBreedR". Please cite this work if you use the software.
 
 ## Variant Call Format (VCF)
 
@@ -112,7 +112,7 @@ The polyBreedR function `impute` was designed for datasets where some percentage
 
 For this vignette, the focus is imputing from low- to high-density marker platforms. This situation arises when a lower density platform, such as DArTag, is used for genomic selection candidates, while the training population has been genotype with a higher density platform, like an array or sequence capture. Another application occurs when genotyping platforms are upgraded over time, to include more markers. For example, the original (V1) potato SNP array had 8K markers, and the current one (V4) has 31K.
 
-Two functions were created in polyBreedR for low-to-high imputation. `impute_L2H` uses the Random Forest method based on a training population of individuals genotyped under both platforms. In general, a larger training population leads to better the imputation accuracy. The default behavior is to use the 200 closest markers and 100 classification trees, but these are adjustable parameters. Consult the help page for more details.
+Two functions were created in polyBreedR for low-to-high imputation. `impute_L2H` uses the Random Forest method based on a training population of individuals genotyped under both platforms. In general, a larger training population leads to better the imputation accuracy. The default behavior is to use the 100 closest markers and 100 classification trees, but these are adjustable parameters. In the publication, using 25 markers provided the lowest imputation error, but this will vary by dataset.
 
 The other function, `impute_LA`, was designed to impute markers in F1 populations based on linkage analysis (LA). The current implementation requires the [software PolyOrigin](https://github.com/chaozhi/PolyOrigin.jl), for which you will need to install Julia and PolyOrigin separately and prepare for [command line execution](https://julialang.org/downloads/platform/). For `impute_LA`, the high-density marker file contains the phased parental genotypes in 0|1 format. 
 

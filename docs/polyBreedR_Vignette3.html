@@ -345,10 +345,10 @@ Imputation</h1>
 
 
 
-<p>This vignette documents functions developed for the research of
-Endelman et al. (2024) “Targeted genotyping-by-sequencing of potato and
-software for imputation” (link coming soon). Please cite this work if
-you use the software.</p>
+<p>This vignette documents functions developed for the research of <a href="https://doi.org/10.1101/2024.02.12.579978">Endelman et
+al. (2024)</a> “Targeted genotyping-by-sequencing of potato and data
+analysis with R/polyBreedR”. Please cite this work if you use the
+software.</p>
 <div id="variant-call-format-vcf" class="section level2">
 <h2>Variant Call Format (VCF)</h2>
 <p>This vignette illustrates functions for manipulating genome-wide
@@ -515,9 +515,10 @@ current one (V4) has 31K.</p>
 <code>impute_L2H</code> uses the Random Forest method based on a
 training population of individuals genotyped under both platforms. In
 general, a larger training population leads to better the imputation
-accuracy. The default behavior is to use the 200 closest markers and 100
-classification trees, but these are adjustable parameters. Consult the
-help page for more details.</p>
+accuracy. The default behavior is to use the 100 closest markers and 100
+classification trees, but these are adjustable parameters. In the
+publication, using 25 markers provided the lowest imputation error, but
+this will vary by dataset.</p>
 <p>The other function, <code>impute_LA</code>, was designed to impute
 markers in F1 populations based on linkage analysis (LA). The current
 implementation requires the <a href="https://github.com/chaozhi/PolyOrigin.jl">software PolyOrigin</a>,

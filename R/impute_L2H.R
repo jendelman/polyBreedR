@@ -2,7 +2,7 @@
 #' 
 #' Impute from low to high density markers by Random Forest
 #' 
-#' Argument \code{params} is a list with three named elements: format, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). Classification trees are used for GT and regression trees for DS. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 200), chosen based on minimum distance to the target. 
+#' Argument \code{params} is a list with three named elements: format, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). Classification trees are used for GT and regression trees for DS. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. 
 #' 
 #' The \code{exclude} argument is useful for cross-validation. 
 #' 
@@ -83,7 +83,7 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   if (!("n.tree" %in% np))
     params$n.tree <- 100
   if (!("n.mark" %in% np))
-    params$n.mark <- 200
+    params$n.mark <- 100
   
   vcf1 <- length(grep("VCF",toupper(high.file),fixed=T)) > 0
   if (vcf1) {

@@ -1,5 +1,6 @@
 Changes in 0.43
 * impute_L2H was missing mean/mode imputation for CSV input
+* changed default n.mark to 100 for impute_L2H
 
 Changes in 0.42
 * new option "model.fit" in gbs function 
