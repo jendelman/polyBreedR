@@ -1,3 +1,6 @@
+Changes in 0.44
+* G_mat has option for reference allele frequency
+
 Changes in 0.43
 * impute_L2H was missing mean/mode imputation for CSV input
 * changed default n.mark to 100 for impute_L2H

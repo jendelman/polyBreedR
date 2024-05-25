@@ -4,12 +4,14 @@
 \alias{G_mat}
 \title{Additive genomic relationships}
 \usage{
-G_mat(geno, ploidy)
+G_mat(geno, ploidy, p.ref = NULL)
 }
 \arguments{
 \item{geno}{Matrix of allele dosages (markers x indiv)}
 
 \item{ploidy}{Any even integer (2,4,6,...)}
+
+\item{p.ref}{reference population frequency}
 }
 \value{
 G matrix
@@ -18,12 +20,16 @@ G matrix
 Relationship matrix for additive effects with bi-allelic markers
 }
 \details{
-Additive effects are based on the traditional orthogonal decomposition of genetic variance in panmictic populations (Fisher 1918; Kempthorne 1957; Endelman et al. 2018). Missing genotype data is replaced with the population mean.
+Additive effects are based on the traditional orthogonal decomposition of genetic variance in panmictic populations (Fisher 1918; Kempthorne 1957; Endelman et al. 2018). Missing genotype data is replaced with the population mean. Equivalent to VanRaden Method 1 for diploids.
+
+If \code{p.ref} is NULL, the current population is used as the reference population.
 }
 \references{
 Fisher (1918) Trans. Roy. Soc. Edin. 52:399-433.
 
 Kempthorne (1957) An Introduction to Genetic Statistics.
+
+VanRaden (2008) J. Dairy Sci 91:4414-4423.
 
 Endelman et al. (2018) Genetics 209:77-87.
 }

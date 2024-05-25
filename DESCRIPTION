@@ -1,6 +1,6 @@
 Package: polyBreedR
 Title: Genomics-assisted breeding for polyploids (and diploids)
-Version: 0.43
+Version: 0.44
 Author: Jeffrey B. Endelman
 Maintainer: Jeffrey Endelman <endelman@wisc.edu>
 Description: Genomics-assisted breeding for polyploids (and diploids)
@@ -9,6 +9,6 @@ License: GPL-3
 LazyData: true
 RoxygenNote: 7.2.3
 Encoding: UTF-8
-Imports: AGHmatrix, ggplot2, ggrepel, pedigree, grDevices, utils, tidyr, Matrix, methods, rlang, updog, randomForest, vcfR, rrBLUP, data.table
-Suggests: knitr, rmarkdown, asreml
+Imports: AGHmatrix, ggplot2, ggrepel, pedigree, grDevices, utils, tidyr, Matrix, rlang, updog, randomForest, vcfR, rrBLUP, data.table
+Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
