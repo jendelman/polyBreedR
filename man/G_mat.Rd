@@ -2,34 +2,38 @@
 % Please edit documentation in R/G_mat.R
 \name{G_mat}
 \alias{G_mat}
-\title{Additive genomic relationships}
+\title{Genomic relationship matrix}
 \usage{
-G_mat(geno, ploidy, p.ref = NULL)
+G_mat(geno, ploidy, p.ref = NULL, method = "VR1", sep = "_", n.core = 1)
 }
 \arguments{
-\item{geno}{Matrix of allele dosages (markers x indiv)}
+\item{geno}{genotype matrix or filename}
 
-\item{ploidy}{Any even integer (2,4,6,...)}
+\item{ploidy}{ploidy}
 
-\item{p.ref}{reference population frequency}
+\item{p.ref}{optional, reference population frequency for method "VR1"}
+
+\item{method}{"VR1" or "AM"}
+
+\item{sep}{character separating id from haplotype for "AM" method}
+
+\item{n.core}{number of cores, only used with "AM"}
 }
 \value{
 G matrix
 }
 \description{
-Relationship matrix for additive effects with bi-allelic markers
+Genomic relationship matrix
 }
 \details{
-Additive effects are based on the traditional orthogonal decomposition of genetic variance in panmictic populations (Fisher 1918; Kempthorne 1957; Endelman et al. 2018). Missing genotype data is replaced with the population mean. Equivalent to VanRaden Method 1 for diploids.
+For \code{method}="VR1", Method 1 of VanRaden (2008) is used, and its polyploid extension (Endelman et al. 2018). Missing data is replaced with the population mean for each marker. If \code{p.ref} is NULL, the current population is used as the reference population. For "VR1", \code{geno} is an allele dosage matrix for bi-allelic loci (sites x indiv). 
 
-If \code{p.ref} is NULL, the current population is used as the reference population.
+For \code{method}="AM", the Allele Matching coefficient is calculated, which is the probability that two haplotypes sampled at random (with replacement) are identical (Weir and Goudet 2017). Missing data are not allowed. For "AM", \code{geno} is a phased genotype matrix, with alleles coded as positive integers. The name of each column is the id and haplotype concatenated with a separating character, \code{sep}. This character needs to be unique (i.e., not present in id or haplotype).
 }
 \references{
-Fisher (1918) Trans. Roy. Soc. Edin. 52:399-433.
-
-Kempthorne (1957) An Introduction to Genetic Statistics.
-
 VanRaden (2008) J. Dairy Sci 91:4414-4423.
 
 Endelman et al. (2018) Genetics 209:77-87.
+
+Weir and Goudet (2017) Genetics 206:2085-2103.
 }

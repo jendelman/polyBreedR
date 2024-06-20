@@ -1,3 +1,7 @@
+Changes in 0.45
+* G_mat has option for allele matching (AM) coefficient
+* Updated CDF1 analysis in madc
+
 Changes in 0.44
 * G_mat has option for reference allele frequency
 

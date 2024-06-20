@@ -25,7 +25,9 @@ get_pedigree <- function(id,pedfile,delim=",",na.string="NA",trim=TRUE) {
     }
     return(ifelse(x %in% y,match(x,y,nomatch = 0),match2(x,y)))
   }
-  ped <- read.table(file=pedfile,as.is=T,na.strings=na.string,sep=delim,header=T)
+  ped <- read.table(file=pedfile, colClasses = rep("character",3), 
+                    na.strings=na.string, 
+                    sep=delim, header=T)
   colnames(ped) <- c("id","parent1","parent2")
   id.out <- id <- unique(id)
   primary.id <- ped$id

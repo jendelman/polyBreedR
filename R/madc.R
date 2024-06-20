@@ -17,6 +17,16 @@
 
 madc <- function(madc.file, marker) {
 
+  reverse_complement <- function(x) {
+    n <- nchar(x)
+    out <- character(n)
+    for (i in 1:n) {
+      y <- substr(x,i,i)
+      k <- match(y,c("A","C","G","T"))
+      out[n-i+1] <- switch(k,"T","G","C","A")
+    }
+    return(paste(out,collapse=""))
+  }
   con <- file(madc.file,open="r")
   tmp <- readLines(con,n=10)
   first.row <- grep("AlleleID",tmp)
@@ -32,37 +42,23 @@ madc <- function(madc.file, marker) {
   if (toupper(marker)=="CDF1") {
     counts <- matrix(0,ncol=4,nrow=n,
                 dimnames=list(id,c("CDF1.1","CDF1.2T","CDF1.2C","CDF1.4")))
-    k <- which(data$AlleleID=="CDF1.4_chr05_4488021|Ref")
-    counts[,"CDF1.1"] <- tmp[k,]
-    k <- which(data$AlleleID=="CDF1.4_chr05_4488021|Alt")
-    counts[,"CDF1.4"] <- tmp[k,]
-    k <- which(data$AlleleID=="CDF1.4_chr05_4488021|Other")
-    x <- substr(data$AlleleSequence[k],39,45)
-    k2T <- match("ACTAGTG",x,nomatch = 0)
-    if (k2T > 0) {
-      counts[,"CDF1.2T"] <- tmp[k[k2T],]
-    }
-    k2C <- match("GCTAGTG",x,nomatch = 0)
-    if (k2C > 0) {
-      counts[,"CDF1.2C"] <- tmp[k[k2C],]
-    }
-    k1 <- k[setdiff(1:length(x),c(k2T,k2C))]
-    if (length(k1) > 0) {
-      counts[,"CDF1.1"] <- counts[,"CDF1.1"] + apply(tmp[k1,,drop=FALSE],2,sum)
-    }
-    # GT <-apply(counts,1,function(u) {
-    #   v <- ifelse(u >= min.AD,TRUE,FALSE)
-    #   if (!any(v)) {
-    #     return ("3/3")
-    #   } else {
-    #     w <- c("1","2T","2C","4")[v]
-    #     if (length(w) < 2) {
-    #       w <- sort(c(w,"3"))
-    #     }
-    #     paste(w,collapse="/")
-    #   }
-    # })
-    
+    k <- which(data$CloneID=="CDF1.4_chr05_4488021")
+    allele.seq <- apply(array(data$AlleleSequence[k]),1,reverse_complement)
+    CDF1.2T <- grep("CAACACTAGTCACTAGG",allele.seq,fixed=T)
+    CDF1.2C <- grep("CAACACTAGCCACTAGG",allele.seq,fixed=T)
+    CDF1.4 <- grep("CAACACTAGGTATCCCG",allele.seq,fixed=T)
+    CDF1.1 <- setdiff(1:length(k),c(CDF1.2T,CDF1.2C,CDF1.4))
+    if (!(2 %in% CDF1.4))
+      stop("error with CDF1.4")
+    if (!(1 %in% CDF1.1))
+      stop("error with CDF1.1")
+    counts[,"CDF1.1"] <- apply(tmp[k[CDF1.1],,drop=F],2,sum)
+    counts[,"CDF1.4"] <- apply(tmp[k[CDF1.4],,drop=F],2,sum)
+    if (length(CDF1.2C)>0) 
+      counts[,"CDF1.2C"] <- apply(tmp[k[CDF1.2C],,drop=F],2,sum)
+    if (length(CDF1.2T)>0) 
+      counts[,"CDF1.2T"] <- apply(tmp[k[CDF1.2T],,drop=F],2,sum)
+
     return(counts)
   }
   
