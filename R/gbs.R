@@ -68,9 +68,14 @@ gbs <- function(in.file, out.file, ploidy, bias=TRUE, n.core=1,
       AD <- u[-1]
       if ((regexpr("AB",u[1]) > 0)&(regexpr("OD",u[1]) > 0)&(regexpr("SE",u[1]) > 0)) {
         params <- strsplit(u[1],split=";")[[1]]
-        OD <- 10^(-as.numeric(sub("OD=","",params[grep("OD",params)]))/10)
-        SE <- 10^(-as.numeric(sub("SE=","",params[grep("SE",params)]))/10)
-        AB <- as.numeric(sub("AB=","",params[grep("AB",params)]))
+        tmp <- apply(array(params),1,strsplit,split="=")
+        tmp2 <- sapply(tmp,"[[",1)
+        k <- tmp2[1,]=="OD"
+        OD <- 10^(-as.numeric(tmp2[2,k])/10)
+        k <- tmp2[1,]=="SE"
+        SE <- 10^(-as.numeric(tmp2[2,k])/10)
+        k <- tmp2[1,]=="AB"
+        AB <- as.numeric(tmp2[2,k])
       } else {
         return(paste(c(u[1],"AD",u[-1]),collapse="\t"))
       }
