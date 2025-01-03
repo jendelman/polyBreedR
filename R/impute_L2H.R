@@ -115,10 +115,10 @@ impute_L2H <- function(high.file, low.file, out.file=NULL, params=list(),
   
     if (params$model=="class") {
       #geno1 is oriented id x marker
-      geno1 <- t(GT2DS(apply(extract.gt(high,element="GT"), 2, impute.mode),
+      geno1 <- t(GT2DS(apply(extract.gt(high,element=params$format), 2, impute.mode),
                    n.core=n.core))
     } else {
-      geno1 <- t(apply(extract.gt(high,element="DS",as.numeric=T), 2, impute.mean))
+      geno1 <- t(apply(extract.gt(high,element=params$format,as.numeric=T), 2, impute.mean))
     }
     
     map1 <- data.frame(marker=high@fix[,"ID"], 
@@ -151,10 +151,10 @@ impute_L2H <- function(high.file, low.file, out.file=NULL, params=list(),
       stop("Invalid FORMAT")
     
     if (params$model=="class") {
-      geno2 <- t(GT2DS(apply(extract.gt(low,element="GT"), 2, impute.mode),
+      geno2 <- t(GT2DS(apply(extract.gt(low,element=params$format), 2, impute.mode),
                        n.core=n.core))
     } else {
-      geno2 <- t(apply(extract.gt(low,element="DS",as.numeric=T), 2, impute.mean))
+      geno2 <- t(apply(extract.gt(low,element=params$format,as.numeric=T), 2, impute.mean))
     }
     
     map2 <- data.frame(marker=low@fix[,"ID"], 
