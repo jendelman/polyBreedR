@@ -7,7 +7,7 @@
 impute_L2H(
   high.file,
   low.file,
-  out.file,
+  out.file = NULL,
   params = list(),
   exclude = NULL,
   n.core = 1
@@ -27,17 +27,17 @@ impute_L2H(
 \item{n.core}{multicore processing}
 }
 \value{
-matrix of OOB error with dimensions markers x trees
+matrix of OOB error with dimensions markers x trees. For regression model, it is MSE.
 }
 \description{
 Impute from low to high density markers by Random Forest
 }
 \details{
-Argument \code{params} is a list with three named elements: format, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). Classification trees are used for GT and regression trees for DS. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. 
+Argument \code{params} is a list with the following options: format, model, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). \code{model} can be "class" for classification or "regress" for regression when "GT" is used; for "DS" format, only regression is permitted. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. 
 
 The \code{exclude} argument is useful for cross-validation. 
 
 Both VCF and CSV are allowable input file formats--they are recognized based on the file extension. For CSV, the first three columns should be marker, chrom, pos. The output file is CSV. 
 
-Any missing data are imputed separately for each input file at the outset, using the population mean (DS) or mode (GT) for each marker.
+Any missing data are imputed separately for each input file at the outset, using the population mean (regress) or mode (class) for each marker.
 }

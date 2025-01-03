@@ -1,3 +1,6 @@
+Changes in 0.47
+* added "model" parameter to impute_L2H, so regression models can be used with GT format. 
+
 Changes in 0.46
 * improved VCF parsing of model params for gbs(model.file=FALSE)
 

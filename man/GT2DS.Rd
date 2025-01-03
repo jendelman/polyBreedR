@@ -20,5 +20,5 @@ integer data with same dimensions as GT
 Convert GT to ALT allele dosage (DS)
 }
 \details{
-If \code{diploidize} is TRUE, data are recoded as a diploid {0,1,2}.
+If \code{diploidize} is TRUE, data are recoded as a diploid (0,1,2).
 }

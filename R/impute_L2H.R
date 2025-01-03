@@ -2,13 +2,13 @@
 #' 
 #' Impute from low to high density markers by Random Forest
 #' 
-#' Argument \code{params} is a list with three named elements: format, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). Classification trees are used for GT and regression trees for DS. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. 
+#' Argument \code{params} is a list with the following options: format, model, n.tree, n.mark. \code{format} can have values "GT" (integer dosage) or "DS" (real numbers between 0 and ploidy). \code{model} can be "class" for classification or "regress" for regression when "GT" is used; for "DS" format, only regression is permitted. \code{n.tree} is the number of trees (default = 100). \code{n.mark} is the number of markers to use as predictors (default = 100), chosen based on minimum distance to the target. 
 #' 
 #' The \code{exclude} argument is useful for cross-validation. 
 #' 
 #' Both VCF and CSV are allowable input file formats--they are recognized based on the file extension. For CSV, the first three columns should be marker, chrom, pos. The output file is CSV. 
 #' 
-#' Any missing data are imputed separately for each input file at the outset, using the population mean (DS) or mode (GT) for each marker. 
+#' Any missing data are imputed separately for each input file at the outset, using the population mean (regress) or mode (class) for each marker. 
 #' 
 #' @param high.file name of high density file
 #' @param low.file name of low density file
@@ -17,7 +17,7 @@
 #' @param exclude optional, vector of high density samples to exclude
 #' @param n.core multicore processing 
 #' 
-#' @return matrix of OOB error with dimensions markers x trees
+#' @return matrix of OOB error with dimensions markers x trees. For regression model, it is MSE.
 #' 
 #' @import vcfR
 #' @importFrom stats cov sd na.omit
@@ -26,7 +26,7 @@
 #' @importFrom data.table fread fwrite
 #' @export
 
-impute_L2H <- function(high.file, low.file, out.file, params=list(), 
+impute_L2H <- function(high.file, low.file, out.file=NULL, params=list(), 
                         exclude=NULL, n.core=1) {
  
   impute.mode <- function(x) {
@@ -45,8 +45,9 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   }
   impute.RF <- function(data, geno, train.id, pred.id, params) {
     y <- data$y
-    ntest <- nrow(geno) - length(train.id)
-    if (params$format=="GT") {
+    #ntest <- nrow(geno) - length(train.id)
+    ntest <- length(pred.id)
+    if (params$model=="class") {
       if (length(unique(y))==1) {
         return(list(pred=rep(y[1],ntest), error=rep(0,params$n.tree)))
       } else {
@@ -54,10 +55,16 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
           imp <- as.integer(names(which.max(table(y))))
           return(list(pred=rep(imp,ntest), error=rep(as.numeric(NA),params$n.tree)))
         } else {
-          ans <- randomForest(y=factor(y), x=geno[train.id,data$pred,drop=FALSE],
+          if (ntest > 0) {
+            ans <- randomForest(y=factor(y), x=geno[train.id,data$pred,drop=FALSE],
                             xtest=geno[pred.id,data$pred,drop=FALSE],
                             ntree=params$n.tree)
-          return(list(pred=as.integer(as.character(ans$test$predicted)), error=ans$err.rate[,1]))
+            return(list(pred=as.integer(as.character(ans$test$predicted)), error=ans$err.rate[,1]))
+          } else {
+            ans <- randomForest(y=factor(y), x=geno[train.id,data$pred,drop=FALSE],
+                                ntree=params$n.tree)
+            return(list(pred=integer(0), error=ans$err.rate[,1]))
+          }
         }
       }
     } else {
@@ -68,10 +75,16 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
           imp <- mean(y,na.rm=T)
           return(list(pred=rep(imp,ntest), error=rep(as.numeric(NA),params$n.tree)))
         } else {
-          ans <- suppressWarnings(randomForest(y=y, x=geno[train.id,data$pred,drop=FALSE],
+          if (ntest > 0) {
+            ans <- suppressWarnings(randomForest(y=y, x=geno[train.id,data$pred,drop=FALSE],
                                              xtest=geno[pred.id,data$pred,drop=FALSE],
                                              ntree=params$n.tree))
-          return(list(pred=ans$test$predicted, error=ans$mse))
+            return(list(pred=ans$test$predicted, error=ans$mse))
+          } else {
+            ans <- suppressWarnings(randomForest(y=y, x=geno[train.id,data$pred,drop=FALSE],
+                                                 ntree=params$n.tree))
+            return(list(pred=numeric(0), error=ans$mse))
+          }
         }
       }
     }
@@ -80,6 +93,13 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   np <- names(params)
   if (!("format" %in% np))
     params$format <- "GT"
+  if (!("model" %in% np)) {
+    params$model <- "class"
+    if (params$format=="DS")
+      params$model <- "regress"
+  }
+  if (params$format=="DS" & params$model=="class")
+    stop("Only regression trees allowed with DS")
   if (!("n.tree" %in% np))
     params$n.tree <- 100
   if (!("n.mark" %in% np))
@@ -93,7 +113,7 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
     if (!(params$format %in% fields))
       stop("Invalid FORMAT")
   
-    if (params$format=="GT") {
+    if (params$model=="class") {
       #geno1 is oriented id x marker
       geno1 <- t(GT2DS(apply(extract.gt(high,element="GT"), 2, impute.mode),
                    n.core=n.core))
@@ -111,7 +131,7 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
     map1 <- high[,1:3]
     colnames(map1) <- c("marker","chrom","pos")
     geno1 <- t(as.matrix(high[,-(1:3)]))
-    if (params$format=="GT") {
+    if (params$model=="class") {
       geno1 <- apply(geno1,2,function(z){impute.mode(as.integer(z))})
     } else {
       geno1 <- apply(geno1,2,impute.mean)
@@ -130,7 +150,7 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
     if (!(params$format %in% fields))
       stop("Invalid FORMAT")
     
-    if (params$format=="GT") {
+    if (params$model=="class") {
       geno2 <- t(GT2DS(apply(extract.gt(low,element="GT"), 2, impute.mode),
                        n.core=n.core))
     } else {
@@ -147,7 +167,7 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
     map2 <- low[,1:3]
     colnames(map2) <- c("marker","chrom","pos")
     geno2 <- t(as.matrix(low[,-(1:3)]))
-    if (params$format=="GT") {
+    if (params$model=="class") {
       geno2 <- apply(geno2,2,function(z){impute.mode(as.integer(z))})
     } else {
       geno2 <- apply(geno2,2,impute.mean)
@@ -157,7 +177,8 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   
   train.id <- intersect(rownames(geno1),rownames(geno2))
   pred.id <- setdiff(rownames(geno2),train.id)
-  if (length(pred.id)==0)
+  n.pred <- length(pred.id)
+  if (n.pred==0 & !is.null(out.file))
     stop("All low-density individuals in high-density file.")
     
   nid <- length(train.id)
@@ -193,14 +214,17 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   } else {
     tmp <- lapply(data, FUN=impute.RF, geno=geno2, train.id, pred.id, params)
   }
-  geno.imp <- matrix(sapply(tmp,"[[",1),nrow=m1,byrow = T)
-  dimnames(geno.imp) <- list(map1$marker,pred.id)
-  geno.out <- cbind(t(geno1[train.id,]),geno.imp)[,rownames(geno2)]
-  error <- matrix(sapply(tmp,"[[",2),nrow=m1,byrow = T)
-  
-  if (n.core > 1) {
+  if (n.core > 1)
     stopCluster(cl)
+  
+  if (n.pred > 0) {
+    geno.imp <- matrix(sapply(tmp,"[[",1),nrow=m1,byrow = T)
+    dimnames(geno.imp) <- list(map1$marker,pred.id)
+    geno.out <- cbind(t(geno1[train.id,]),geno.imp)[,rownames(geno2)]
+    fwrite(cbind(map1,geno.out),file=out.file,row.names=F)
   }
+  error <- matrix(sapply(tmp,"[[",2),nrow=m1,byrow = T)
+  return(error)
   
   # if (vcf1) {
   #   GT <- apply(geno.out,c(1,2),make_GT,ploidy=ploidy)
@@ -213,7 +237,5 @@ impute_L2H <- function(high.file, low.file, out.file, params=list(),
   #             fixed=fixed,
   #             geno=list(GT=GT,AD=AD,DP=DP))
   # } else {
-  fwrite(cbind(map1,geno.out),file=out.file,row.names=F)
-  
-  return(error)
+
 }

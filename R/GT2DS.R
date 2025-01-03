@@ -2,7 +2,7 @@
 #' 
 #' Convert GT to ALT allele dosage (DS)
 #' 
-#' If \code{diploidize} is TRUE, data are recoded as a diploid {0,1,2}.
+#' If \code{diploidize} is TRUE, data are recoded as a diploid (0,1,2).
 #' 
 #' @param GT GT string
 #' @param diploidize TRUE/FALSE
