@@ -23,7 +23,7 @@ vcf2csv <- function(vcf.file, csv.file, format) {
     geno <- extract.gt(data,element="DS",as.numeric=T)
   }
   markers <- data@fix[,"ID"]
-  chrom_pos <- apply(data@fix[,c("CHROM","POS")],1,paste,sep="_")
+  chrom_pos <- apply(data@fix[,c("CHROM","POS")],1,paste,collapse="_")
   iv <- is.na(markers)
   markers[iv] <- chrom_pos[iv]
   write.csv(data.frame(marker=markers,chrom=data@fix[,"CHROM"],position=data@fix[,"POS"],geno,check.names = F),file=csv.file,row.names=F)
