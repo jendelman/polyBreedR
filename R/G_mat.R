@@ -10,7 +10,7 @@
 #' @references Endelman et al. (2018) Genetics 209:77-87.
 #' @references Weir and Goudet (2017) Genetics 206:2085-2103.
 #'  
-#' @param geno genotype matrix or filename
+#' @param geno genotype matrix (markers x id) or filename
 #' @param ploidy ploidy
 #' @param p.ref optional, reference population frequency for method "VR1"
 #' @param method "VR1" or "AM"

@@ -1,3 +1,8 @@
+Changes in 0.48
+* new argument "founders" in get_pedigree
+* new function maternal_lineage
+* support for inbred line names in get_pedigree
+
 Changes in 0.47
 * added "model" parameter to impute_L2H, so regression models can be used with GT format. 
 

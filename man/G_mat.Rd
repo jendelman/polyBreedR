@@ -7,7 +7,7 @@
 G_mat(geno, ploidy, p.ref = NULL, method = "VR1", sep = "_", n.core = 1)
 }
 \arguments{
-\item{geno}{genotype matrix or filename}
+\item{geno}{genotype matrix (markers x id) or filename}
 
 \item{ploidy}{ploidy}
 
