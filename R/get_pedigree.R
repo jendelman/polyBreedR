@@ -2,7 +2,7 @@
 #' 
 #' Generate pedigree for a set of individuals
 #' 
-#' Finds ancestors of individuals in a three-column pedigree file (id,mother,father). The id column can be the identifier for an individual or cross. String matches must be exact or based on the naming convention crossID-progenyID. As of v0.49, inbred line names are supported, with en-dash separating each generation of inbreeding. The returned pedigree is ordered using R package \code{pedigree} so that offspring follow parents. When \code{trim} is TRUE (default), the pedigree is trimmed to remove ancestors with only one offspring (which are not needed to compute the pedigree relationship matrix). 
+#' Finds ancestors of individuals in a three-column pedigree file (id,mother,father). The id column can be the identifier for an individual or cross. String matches must be exact or based on the naming convention crossID-progenyID. As of v0.48, inbred line names are supported, with en-dash separating each generation of inbreeding. The returned pedigree is ordered using R package \code{pedigree} so that offspring follow parents. When \code{trim} is TRUE (default), the pedigree is trimmed to remove ancestors with only one offspring (which are not needed to compute the pedigree relationship matrix). 
 #'  
 #' @param id Vector of names of individuals
 #' @param pedfile Name of pedigree file
@@ -60,6 +60,7 @@ get_pedigree <- function(id,pedfile,delim=",",na.string="NA",
                     sep=delim, header=T)
   colnames(ped) <- c("id","parent1","parent2")
   id.out <- id <- unique(id)
+  id <- gsub("-DH","_DH",id)
   primary.id <- ped$id
   ped2 <- NULL
    
@@ -70,7 +71,8 @@ get_pedigree <- function(id,pedfile,delim=",",na.string="NA",
     ped2 <- rbind(ped2,ans$ped)
     ans <- f.inbred(id)
   }
-  
+  ped2 <- ped2[!duplicated(ped2$id),]
+    
   while (length(id)>0) {
     ix <- ped.match(id,primary.id)
     present <- which(ix>0)
