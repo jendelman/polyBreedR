@@ -29,7 +29,6 @@ get_pedigree <- function(id,pedfile,delim=",",na.string="NA",
   }
   
   f.inbred <- function(x) {
-    #take list of names
     #anything inbred is removed, its parents added
     x2 <- strsplit(x,split="-",fixed=T)
     len <- sapply(x2,length)
