@@ -8,8 +8,10 @@
 #' 
 #' "OFP20" relies on three markers. Marker OFP20_M6_CDS_994 detects OFP20.1 as Alt and most other haplotypes as Ref, but some alleles appear to be NULL. Marker OFP20_M6_CDS_171 detects allele 2 as Alt and alleles 3 and 7 as Ref; other alleles are NULL. Marker OFP20_M6_CDS_24 detects allele 8 as Ref and most other alleles as Alt. Given the high allelic diversity at this locus, this function may not work in all germplasm groups.
 #' 
+#' "Rychc" returns read counts at Rychc_M6v5_chr09_37964457 for the M6 allele.
+#' 
 #' @param madc.file MADC filename
-#' @param marker Name of marker ("CDF1","OFP20")
+#' @param marker Name of marker ("CDF1","OFP20","Rychc")
 #'
 #' @return matrix of haplotype counts
 #' @export
@@ -75,5 +77,13 @@ madc <- function(madc.file, marker) {
                    'AD3&7'=data2[,5])
     rownames(data3) <- rownames(data2)
     return(data3)      
+  }
+  
+  if (toupper(marker)=="RYCHC") {
+    x <- "Rychc_M6v5_chr09_37964457|Ref"
+    ix <- match(x,data$AlleleID)
+    data2 <- t(tmp[ix,,drop=FALSE])
+    dimnames(data2) <- list(colnames(tmp),"Rychc.M6")
+    return(data2)
   }
 }

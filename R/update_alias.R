@@ -25,6 +25,7 @@ update_alias <- function(x,alias,remove.space=TRUE,filename=NULL) {
     x <- gsub(pattern=" ",replacement = "",x=x,fixed=T)
     x <- gsub(pattern="-0",replacement="-",x,fixed=T)
     x <- gsub(pattern="-00",replacement="-",x,fixed=T)
+    x <- gsub(pattern='[^a-zA-Z0-9.-]',replacement="",x=x)
   }
   
   ix <- which(x %in% alias[,2])

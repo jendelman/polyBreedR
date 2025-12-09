@@ -1,3 +1,7 @@
+Changes in 0.49
+* update_alias removes special characters
+* Rychc added to madc
+
 Changes in 0.48
 * new argument "founders" in get_pedigree
 * new function maternal_lineage

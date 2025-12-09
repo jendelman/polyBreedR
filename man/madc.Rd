@@ -9,7 +9,7 @@ madc(madc.file, marker)
 \arguments{
 \item{madc.file}{MADC filename}
 
-\item{marker}{Name of marker ("CDF1","OFP20")}
+\item{marker}{Name of marker ("CDF1","OFP20","Rychc")}
 }
 \value{
 matrix of haplotype counts
@@ -23,4 +23,6 @@ Due to multi-allelism, for some trait markers a correct interpretation is not po
 "CDF1" uses marker CDF1.4_chr05_4488021 to detect the 2C, 2T, and 4 alleles; all other haplotypes are treated as allele 1. Allele 3 is not detected by the assay. 
 
 "OFP20" relies on three markers. Marker OFP20_M6_CDS_994 detects OFP20.1 as Alt and most other haplotypes as Ref, but some alleles appear to be NULL. Marker OFP20_M6_CDS_171 detects allele 2 as Alt and alleles 3 and 7 as Ref; other alleles are NULL. Marker OFP20_M6_CDS_24 detects allele 8 as Ref and most other alleles as Alt. Given the high allelic diversity at this locus, this function may not work in all germplasm groups.
+
+"Rychc" returns read counts at Rychc_M6v5_chr09_37964457 for the M6 allele.
 }
