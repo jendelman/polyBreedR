@@ -1,6 +1,6 @@
 Package: polyBreedR
 Title: Genomics-assisted breeding for polyploids (and diploids)
-Version: 0.48
+Version: 0.49
 Author: Jeffrey B. Endelman
 Maintainer: Jeffrey Endelman <endelman@wisc.edu>
 Description: Genomics-assisted breeding for polyploids (and diploids)
