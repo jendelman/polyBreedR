@@ -1,3 +1,7 @@
+Changes in 0.50
+* Added function get_parents, rewrote get_pedigree
+* Added function contribution
+
 Changes in 0.49
 * update_alias removes special characters
 * Rychc added to madc
