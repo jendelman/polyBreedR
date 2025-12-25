@@ -65,14 +65,14 @@ get_parents <- function(id, pedfile, delim=",", na.string="NA", DH=FALSE) {
           output[ix2[iu[k]],2:3] <- paste(stem[k],c(y[k],y[k]),sep="-")
         }
       }
+    } 
+    
+    #now look up remainder in file
+    if (length(ix3) > 0) {
+      ix <- ped.match(id[ix3],ped$id)
+      present <- which(ix>0)
+      output[ix3[present],2:3] <- ped[ix[present],2:3]
     }
-  }
-  
-  #now look up remainder in file
-  if (length(ix3) > 0) {
-    ix <- ped.match(id[ix3],ped$id)
-    present <- which(ix>0)
-    output[ix3[present],2:3] <- ped[ix[present],2:3]
   }
   
   return(output)
