@@ -10,8 +10,8 @@ get_pedigree(
   delim = ",",
   na.string = "NA",
   trim = TRUE,
-  founders = F,
-  DH = F
+  founders = TRUE,
+  DH = FALSE
 )
 }
 \arguments{

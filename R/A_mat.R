@@ -23,6 +23,12 @@ A_mat <- function(ped,ploidy,order.ped=TRUE) {
   for (i in 1:3) {
     ped[,i] <- as.character(ped[,i])
   }
+  parents <- union(ped$mother,ped$father)
+  founders <- setdiff(parents,ped$id)
+  ped <- rbind(data.frame(id=founders, 
+                          mother=as.character(NA), 
+                          father=as.character(NA)),
+               ped)
   ped2 <- data.frame(id=1:nrow(ped),
                      parent1=match(ped$mother,ped$id,nomatch=0),
                      parent2=match(ped$father,ped$id,nomatch=0))

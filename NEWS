@@ -1,3 +1,7 @@
+Changes in 0.51
+* A_mat adds founders to pedigree if missing
+* get_pedigree default changed to founders=TRUE
+
 Changes in 0.50
 * Added function get_parents, rewrote get_pedigree
 * Added function contribution

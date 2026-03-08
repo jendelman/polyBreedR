@@ -21,7 +21,7 @@
 #' @importFrom pedigree orderPed
 
 get_pedigree <- function(id,pedfile,delim=",",na.string="NA",
-                         trim=TRUE, founders=F, DH=F) {
+                         trim=TRUE, founders=TRUE, DH=FALSE) {
   
   ped <- read.table(file=pedfile, colClasses = rep("character",3), 
                     na.strings=na.string, 
