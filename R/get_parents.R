@@ -8,14 +8,13 @@
 #' @param pedfile Name of pedigree file
 #' @param delim Delimiter for the pedigree file (default is "," for CSV)
 #' @param na.string String used for NA in the pedigree file (default is "NA")
-#' @param DH TRUE/FALSE should 4x parent of dihaploid be returned
 #' 
 #' @return Data frame with columns id, mother, father
 #' 
 #' @export
 #' @importFrom utils read.table
 
-get_parents <- function(id, pedfile, delim=",", na.string="NA", DH=FALSE) {
+get_parents <- function(id, pedfile, delim=",", na.string="NA") {
   
   ped.match <- function(x,y) {
     match2 <- function(x,y) {
@@ -35,11 +34,11 @@ get_parents <- function(id, pedfile, delim=",", na.string="NA", DH=FALSE) {
                        father=as.character(NA))
   
   ix1 <- grep("-DH",id,fixed=T)
-  if (length(ix1) > 0) {
-    if (DH) {
-      output$mother[ix1] <- sapply(strsplit(id[ix1],split="-DH"),"[[",1)
-    } #otherwise stays NA
-  }
+  # if (length(ix1) > 0) {
+  #   if (DH) {
+  #     output$mother[ix1] <- sapply(strsplit(id[ix1],split="-DH"),"[[",1)
+  #   } #otherwise stays NA
+  # }
   
   #then inbreds
   ix2 <- setdiff(1:n,ix1)

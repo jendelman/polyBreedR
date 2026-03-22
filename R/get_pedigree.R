@@ -2,7 +2,7 @@
 #' 
 #' Generate pedigree for A matrix calculation
 #' 
-#' Returns ancestors of \code{id} using lower-level function \code{\link{get_parents}}. Input \code{pedfile} is three-column pedigree file (id,mother,father). The id column can be the identifier for an individual or cross. String matches must be exact or based on the naming convention crossID-progenyID. As of v0.48, inbred line names are supported, with en-dash separating each generation of inbreeding. 
+#' Returns ancestors of \code{id} using lower-level function \code{\link{get_parents}}. Input \code{pedfile} is three-column pedigree file (id,mother,father). The id column can be the identifier for an individual or cross. String matches must be exact or based on the naming convention crossID-progenyID. As of v0.48, inbred line names are supported, with en-dash separating each generation of inbreeding. Remove other uses of en-dash!
 #' 
 #' The returned pedigree is ordered using R package \code{pedigree} so that offspring follow parents. When \code{trim} is TRUE (default), the pedigree is trimmed to remove ancestors with only one offspring (which are not needed to compute the pedigree relationship matrix). 
 #'  
@@ -12,27 +12,26 @@
 #' @param na.string String used for NA in the pedigree file (default is "NA")
 #' @param trim TRUE/FALSE whether to trim pedigree (see Details)
 #' @param founders TRUE/FALSE should all pedigree founders be included in id column
-#' @param DH TRUE/FALSE should 4x parent of dihaploids be included
 #' 
-#' @return Data frame with columns id, mother, father
+#' @return Data frame in 3-col format
 #' 
 #' @export
 #' @importFrom utils read.table
 #' @importFrom pedigree orderPed
 
 get_pedigree <- function(id,pedfile,delim=",",na.string="NA",
-                         trim=TRUE, founders=TRUE, DH=FALSE) {
+                         trim=TRUE, founders=TRUE) {
   
   ped <- read.table(file=pedfile, colClasses = rep("character",3), 
                     na.strings=na.string, 
                     sep=delim, header=T)
   colnames(ped) <- c("id","mother","father")
   
-  ped2 <- get_parents(id,pedfile,delim=delim,na.string=na.string,DH=DH)
+  ped2 <- get_parents(id,pedfile,delim=delim,na.string=na.string)
   new.id <- setdiff(union(ped2$mother,ped2$father),
                     c(ped2$id,as.character(NA))) 
   while (length(new.id) > 0) {
-    tmp <- get_parents(new.id,pedfile,delim=delim,na.string=na.string,DH=DH)
+    tmp <- get_parents(new.id,pedfile,delim=delim,na.string=na.string)
     ped2 <- rbind(tmp,ped2)
     new.id <- setdiff(union(ped2$mother,ped2$father),
                       c(ped2$id,as.character(NA))) 
@@ -60,5 +59,6 @@ get_pedigree <- function(id,pedfile,delim=",",na.string="NA",
                                father=as.character(NA)), ped2)
     }
   }
+  
   return(ped2)
 }

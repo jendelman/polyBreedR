@@ -7,9 +7,9 @@
 A_mat(ped, ploidy, order.ped = TRUE)
 }
 \arguments{
-\item{ped}{Pedigree in three column format: id, mother, father}
+\item{ped}{Pedigree in 3 or 7 column format (see Details)}
 
-\item{ploidy}{2 or 4}
+\item{ploidy}{integer or NULL for mixed ploidy pedigree}
 
 \item{order.ped}{TRUE/FALSE does the pedigree need to be ordered so that progeny follow parents}
 }
@@ -20,8 +20,12 @@ Additive relationship matrix (dim: indiv x indiv)
 Additive relationship matrix from pedigree
 }
 \details{
-This is a wrapper that prepares the pedigree in the format required for R package \code{AGHmatrix} by Amadeu et al. (2016) (cite them if you use this function). A random bivalents model for tetraploid meiosis is assumed.
+Founders should have NA for mother and father. Any parents not listed in the first column are added as founders. 
+
+This is a wrapper that prepares the pedigree in the format required for R package \code{polyAinv} by Hamilton and Kerr (cite them if you use this function). A random bivalents model for tetraploid meiosis is assumed.
+
+Pedigree assumes mother (dam) before father (sire). 7-col format pedigree is needed for mixed ploidy: id, dam, sire, dam.gamete, dam.lambda, sire.gamete, sire.lambda (Hamilton and Kerr 2018).
 }
 \references{
-Amadeu et al. (2016) Plant Genome 9, doi:10.3835/plantgenome2016.01.0009
+Hamilton and Kerr (2018) Theor Appl Genet 131:851-860 doi:10.1007/s00122-017-3041-y
 }

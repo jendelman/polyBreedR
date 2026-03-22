@@ -4,7 +4,7 @@
 \alias{get_parents}
 \title{Get parents of genotypes}
 \usage{
-get_parents(id, pedfile, delim = ",", na.string = "NA", DH = FALSE)
+get_parents(id, pedfile, delim = ",", na.string = "NA")
 }
 \arguments{
 \item{id}{Vector of target names}
@@ -14,8 +14,6 @@ get_parents(id, pedfile, delim = ",", na.string = "NA", DH = FALSE)
 \item{delim}{Delimiter for the pedigree file (default is "," for CSV)}
 
 \item{na.string}{String used for NA in the pedigree file (default is "NA")}
-
-\item{DH}{TRUE/FALSE should 4x parent of dihaploid be returned}
 }
 \value{
 Data frame with columns id, mother, father

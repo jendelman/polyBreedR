@@ -1,3 +1,6 @@
+Changes in 0.52
+* A_mat changed to use polyAinv, support for mixed ploidy
+
 Changes in 0.51
 * A_mat adds founders to pedigree if missing
 * get_pedigree default changed to founders=TRUE
