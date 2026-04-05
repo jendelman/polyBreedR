@@ -29,10 +29,10 @@ A_mat <- function(ped, ploidy, order.ped=TRUE) {
   } else {
     ploidy <- as.integer(ploidy)
   }
+  for (i in 1:3) {
+    ped[,i] <- as.character(ped[,i])
+  }
   if (ncol(ped)==3) {
-    for (i in 1:3) {
-      ped[,i] <- as.character(ped[,i])
-    }
     colnames(ped) <- c("id","dam","sire")
     ped <- data.frame(ped, dam.gamete=ploidy/2, dam.lambda=0,
                       sire.gamete=ploidy/2, sire.lambda=0)
