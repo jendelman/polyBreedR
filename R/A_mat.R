@@ -40,7 +40,7 @@ A_mat <- function(ped, ploidy, order.ped=TRUE) {
     colnames(ped) <- c("id","dam","sire","dam.gamete","dam.lambda","sire.gamete","sire.lambda")
   }
   
-  parents <- setdiff(union(ped$dam,ped$sire),NA)
+  parents <- setdiff(union(ped$dam,ped$sire),NA_character_)
   missing.founders <- setdiff(parents,ped$id)
   founders <- ped$id[which(is.na(ped$dam)&is.na(ped$sire))]
   founders.not.parents <- setdiff(founders,parents)
@@ -50,8 +50,8 @@ A_mat <- function(ped, ploidy, order.ped=TRUE) {
     if (is.null(ploidy))
       stop("Missing founders not allowed for mixed ploidy input")
     ped <- rbind(data.frame(id=missing.founders, 
-                            dam=as.character(NA), 
-                            sire=as.character(NA),
+                            dam=NA_character_, 
+                            sire=NA_character_,
                             dam.gamete=ploidy/2, dam.lambda=0,
                             sire.gamete=ploidy/2, sire.lambda=0),
                ped)
