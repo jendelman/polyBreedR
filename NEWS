@@ -1,3 +1,6 @@
+Changes in 0.53
+* A_mat option to return inverse
+
 Changes in 0.52
 * A_mat changed to use polyAinv, support for mixed ploidy
 

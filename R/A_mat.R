@@ -13,8 +13,9 @@
 #' @param ped Pedigree in 3 or 7 column format (see Details)
 #' @param ploidy integer or NULL for mixed ploidy pedigree
 #' @param order.ped TRUE/FALSE does the pedigree need to be ordered so that progeny follow parents
+#' @param inverse TRUE/FALSE to return matrix inverse
 #' 
-#' @return Additive relationship matrix (dim: indiv x indiv)
+#' @return Additive relationship matrix (dim: indiv x indiv) or its inverse
 #' 
 #' @export
 #' @import polyAinv
@@ -22,7 +23,7 @@
 #' @importFrom pedigree orderPed
 #' @import Matrix
 
-A_mat <- function(ped, ploidy, order.ped=TRUE) {
+A_mat <- function(ped, ploidy, order.ped=TRUE, inverse=FALSE) {
   
   if (is.null(ploidy)) {
     stopifnot(ncol(ped)==7)
@@ -81,13 +82,17 @@ A_mat <- function(ped, ploidy, order.ped=TRUE) {
                       j=ans$A.inv$id2,
                       x=ans$A.inv$A.INV,
                       symmetric=TRUE, dims = c(n,n))
-  A <- drop0(solve(Ainv),1e-6)
+  if (inverse) {
+    output <- drop0(Ainv,1e-6)
+  } else {
+    output <- drop0(solve(Ainv),1e-6)
+  }
   if (nfp > 0) {
-    A <- bdiag(Diagonal(n=nfp),A)
+    output <- bdiag(Diagonal(n=nfp),output)
     id <- c(founders.not.parents,ped1$id)
   } else {
     id <- ped1$id
   }
-  dimnames(A) <- list(id,id)
-  return(as.matrix(A))
+  dimnames(output) <- list(id,id)
+  return(as.matrix(output))
 }

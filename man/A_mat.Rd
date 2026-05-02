@@ -4,7 +4,7 @@
 \alias{A_mat}
 \title{Additive relationship matrix from pedigree}
 \usage{
-A_mat(ped, ploidy, order.ped = TRUE)
+A_mat(ped, ploidy, order.ped = TRUE, inverse = FALSE)
 }
 \arguments{
 \item{ped}{Pedigree in 3 or 7 column format (see Details)}
@@ -12,9 +12,11 @@ A_mat(ped, ploidy, order.ped = TRUE)
 \item{ploidy}{integer or NULL for mixed ploidy pedigree}
 
 \item{order.ped}{TRUE/FALSE does the pedigree need to be ordered so that progeny follow parents}
+
+\item{inverse}{TRUE/FALSE to return matrix inverse}
 }
 \value{
-Additive relationship matrix (dim: indiv x indiv)
+Additive relationship matrix (dim: indiv x indiv) or its inverse
 }
 \description{
 Additive relationship matrix from pedigree
